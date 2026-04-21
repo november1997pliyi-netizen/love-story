@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 目前开放读写，适合私人使用
+    // 如果想更安全，以后可以加上用户登录验证
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
