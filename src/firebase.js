@@ -1,3 +1,6 @@
+// ⚠️  把下面的内容替换成你自己的 Firebase 配置
+// 第三步会告诉你去哪里复制这些数字
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
