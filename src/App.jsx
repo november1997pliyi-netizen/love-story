@@ -227,10 +227,10 @@ function PhotoStrip({ photos, onPhotoClick, compact=false }) {
 
 // ─── Reaction bar ────────────────────────────────────────
 const REACTION_LIST = [
-  { key:"heart", emoji:"❤️"  },
-  { key:"haha",  emoji:"😂"  },
-  { key:"cheer", emoji:"💪"  },
-  { key:"hug",   emoji:"🤗"  },
+  { key:"heart", emoji:"❤️" },
+  { key:"move",  emoji:"🥺" },
+  { key:"cheer", emoji:"💪" },
+  { key:"hug",   emoji:"🤗" },
 ];
 function ReactionBar({ entryId, reactions={} }) {
   async function toggle(key) {
@@ -260,7 +260,6 @@ function ReactionBar({ entryId, reactions={} }) {
 }
 
 // ─── Single entry card ───────────────────────────────────
-// Text-over-image design: photo is full-width background, text overlaid with gradient
 function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick }) {
   const [hov, setHov] = useState(false);
   const c = COL[e.writer];
@@ -270,72 +269,131 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick }) {
 
   return (
     <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
-      style={{ background: T.cloudDancer, border:`1.5px solid ${hov?c.border:T.border}`,
+      style={{ background:T.cloudDancer, border:`1.5px solid ${hov?c.border:T.border}`,
         borderRadius:18, overflow:"hidden", transition:"all 0.25s",
         transform:hov?"translateY(-2px)":"none",
         boxShadow:hov?"0 8px 28px rgba(60,48,36,0.12)":"0 1px 4px rgba(60,48,36,0.06)",
         marginBottom:14 }}>
 
-      {/* Accent line */}
-      <div style={{ height:3, background:`linear-gradient(90deg,${c.text}88,transparent)` }}/>
-
       {hasPhoto ? (
-        // ── Text OVER image layout ──
-        <div style={{ position:"relative" }}>
-          <PhotoStrip photos={photos} onPhotoClick={onPhotoClick} compact={false}/>
-          {/* Overlay card for text */}
-          <div style={{ margin:"0 12px 0", background:"white",
-            borderRadius:"0 0 14px 14px", padding:"10px 14px 12px",
-            boxShadow:"0 4px 12px rgba(60,48,36,0.08)" }}>
-            <HeaderRow e={e} c={c} names={names} mood={mood}/>
-            <TextBody e={e}/>
+        // ── TRUE text-over-image ──
+        <>
+          <div style={{ position:"relative" }}>
+            {/* Main photo */}
+            <img
+              src={photos[0]}
+              onClick={()=>onPhotoClick&&onPhotoClick(photos[0])}
+              style={{ display:"block", width:"100%", height:"auto",
+                maxHeight:280, objectFit:"cover", cursor:"zoom-in" }}
+            />
+            {/* Gradient overlay — dark at top and bottom */}
+            <div style={{ position:"absolute", inset:0, pointerEvents:"none",
+              background:"linear-gradient(to bottom, rgba(28,24,20,0.45) 0%, rgba(28,24,20,0) 40%, rgba(28,24,20,0) 52%, rgba(28,24,20,0.68) 100%)" }}/>
+
+            {/* TOP: author chip + time */}
+            <div style={{ position:"absolute", top:10, left:10, right:10,
+              display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <span style={{ fontSize:11, fontFamily:SANS, letterSpacing:"0.1em", textTransform:"uppercase",
+                color:"white", background:c.text+"CC", padding:"3px 10px", borderRadius:20 }}>
+                {e.writer==="a"?names.a:names.b}
+              </span>
+              <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                <FaceSvg index={e.hearts-1} size={16} color="white"/>
+                {photos.length > 1 && (
+                  <span style={{ fontSize:11, fontFamily:SANS, color:"white",
+                    background:"rgba(28,24,20,0.5)", padding:"2px 8px", borderRadius:20 }}>
+                    +{photos.length-1}
+                  </span>
+                )}
+                <span style={{ fontSize:11, color:"rgba(255,255,255,0.8)", fontFamily:SANS }}>
+                  {fmtTime(e.at)}
+                </span>
+              </div>
+            </div>
+
+            {/* BOTTOM: location + food overlaid */}
+            {(e.location || e.food) && (
+              <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"10px 12px" }}>
+                {e.location && (
+                  <div style={{ display:"flex", gap:6, marginBottom:3 }}>
+                    <span style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>◎</span>
+                    <span style={{ fontSize:13, color:"white", fontFamily:SANS, lineHeight:1.4,
+                      textShadow:"0 1px 3px rgba(0,0,0,0.4)" }}>{e.location}</span>
+                  </div>
+                )}
+                {e.food && (
+                  <div style={{ display:"flex", gap:6 }}>
+                    <span style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>◈</span>
+                    <span style={{ fontSize:13, color:"white", fontFamily:SANS, lineHeight:1.4,
+                      textShadow:"0 1px 3px rgba(0,0,0,0.4)" }}>{e.food}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Notes + extra photos strip + actions — below image */}
+          <div style={{ padding:"10px 14px 0" }}>
+            {/* Extra photos as small strip if >1 */}
+            {photos.length > 1 && (
+              <div style={{ display:"flex", gap:6, marginBottom:8, overflowX:"auto",
+                scrollSnapType:"x mandatory", WebkitOverflowScrolling:"touch", paddingBottom:2 }}>
+                {photos.slice(1).map((src,i)=>(
+                  <div key={i} onClick={()=>onPhotoClick&&onPhotoClick(src)}
+                    style={{ flexShrink:0, scrollSnapAlign:"start",
+                      background:"white", padding:"4px 4px 12px",
+                      boxShadow:"0 2px 8px rgba(60,48,36,0.14)",
+                      transform:`rotate(${TILTS[(i+1)%TILTS.length]}deg)`,
+                      cursor:"zoom-in", width:64 }}>
+                    <img src={src} style={{ display:"block", width:"100%", height:50, objectFit:"cover" }}/>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {e.notes && (
+              <div style={{ fontSize:15, color:T.inkMid, fontFamily:DISPLAY, fontStyle:"italic",
+                lineHeight:1.6, marginBottom:8, paddingTop: e.notes ? 0 : 0 }}>
+                "{e.notes}"
+              </div>
+            )}
             <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview}/>
           </div>
-        </div>
+        </>
       ) : (
-        // ── Text only layout ──
-        <div style={{ padding:"12px 15px 11px" }}>
-          <HeaderRow e={e} c={c} names={names} mood={mood}/>
-          <TextBody e={e}/>
-          <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview}/>
-        </div>
+        // ── Text only ──
+        <>
+          <div style={{ height:3, background:`linear-gradient(90deg,${c.text}88,transparent)` }}/>
+          <div style={{ padding:"12px 15px 11px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8, flexWrap:"wrap", gap:4 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ fontSize:11, fontFamily:SANS, letterSpacing:"0.1em", textTransform:"uppercase",
+                  color:c.text, background:c.dim, padding:"3px 9px", borderRadius:20 }}>
+                  {e.writer==="a"?names.a:names.b}
+                </span>
+                <FaceSvg index={e.hearts-1} size={18} color={c.text}/>
+                <span style={{ fontSize:11, color:T.inkLight, fontFamily:SANS }}>{mood.label}</span>
+              </div>
+              <span style={{ fontSize:12, color:T.inkLight, fontFamily:SANS }}>{fmtTime(e.at)}</span>
+            </div>
+            {e.location && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◎</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.location}</span></div>}
+            {e.food     && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◈</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.food}</span></div>}
+            {e.notes    && <div style={{ marginTop:8, paddingTop:8, borderTop:`1px solid ${T.border}`, fontSize:16, color:T.inkMid, fontFamily:DISPLAY, fontStyle:"italic", lineHeight:1.6 }}>"{e.notes}"</div>}
+            <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview}/>
+          </div>
+        </>
       )}
 
       {/* Reactions */}
-      <div style={{ padding:"0 15px 11px" }}>
+      <div style={{ padding:"4px 14px 11px" }}>
         <ReactionBar entryId={e.id} reactions={e.reactions}/>
       </div>
     </div>
   );
 }
 
-function HeaderRow({ e, c, names, mood }) {
-  return (
-    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8, flexWrap:"wrap", gap:4 }}>
-      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        <span style={{ fontSize:11, fontFamily:SANS, letterSpacing:"0.1em", textTransform:"uppercase",
-          color:c.text, background:c.dim, padding:"3px 9px", borderRadius:20 }}>
-          {e.writer==="a" ? names.a : names.b}
-        </span>
-        <FaceSvg index={e.hearts-1} size={18} color={c.text}/>
-        <span style={{ fontSize:11, color:T.inkLight, fontFamily:SANS }}>{mood.label}</span>
-      </div>
-      <span style={{ fontSize:12, color:T.inkLight, fontFamily:SANS }}>
-        {fmtTime(e.at)}
-      </span>
-    </div>
-  );
-}
 
-function TextBody({ e }) {
-  return (
-    <>
-      {e.location && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◎</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.location}</span></div>}
-      {e.food     && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◈</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.food}</span></div>}
-      {e.notes    && <div style={{ marginTop:8, paddingTop:8, borderTop:`1px solid ${T.border}`, fontSize:16, color:T.inkMid, fontFamily:DISPLAY, fontStyle:"italic", lineHeight:1.6 }}>"{e.notes}"</div>}
-    </>
-  );
-}
+
 
 function ActionRow({ e, onEdit, onRemove, onPreview }) {
   const btnStyle = (col) => ({
@@ -355,9 +413,21 @@ function ActionRow({ e, onEdit, onRemove, onPreview }) {
 }
 
 // ─── Day group (same day, both people) ───────────────────
+function useIsMobile() {
+  const [mobile, setMobile] = useState(typeof window !== "undefined" && window.innerWidth < 640);
+  useEffect(()=>{
+    const h = ()=>setMobile(window.innerWidth < 640);
+    window.addEventListener("resize", h);
+    return ()=>window.removeEventListener("resize", h);
+  },[]);
+  return mobile;
+}
+
 function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoClick }) {
+  const isMobile = useIsMobile();
   const aEntries = entries.filter(e=>e.writer==="a");
   const bEntries = entries.filter(e=>e.writer==="b");
+  const bothWrote = aEntries.length > 0 && bEntries.length > 0;
 
   return (
     <div style={{ marginBottom:24 }}>
@@ -372,17 +442,26 @@ function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoCl
         <div style={{ height:1, flex:1, background:T.border }}/>
       </div>
 
-      {/* If both wrote: show side-by-side on wide, stacked on narrow */}
-      {aEntries.length > 0 && bEntries.length > 0 ? (
+      {bothWrote && !isMobile ? (
+        // Desktop: side by side
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-          <div>
+          <div>{aEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}</div>
+          <div>{bEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}</div>
+        </div>
+      ) : bothWrote ? (
+        // Mobile: stacked with colored left accent bar
+        <div>
+          <div style={{ borderLeft:`3px solid ${T.rose}`, paddingLeft:10, marginBottom:10 }}>
+            <div style={{ fontSize:10, letterSpacing:"0.1em", textTransform:"uppercase", color:T.rose, fontFamily:SANS, marginBottom:6 }}>{names.a}</div>
             {aEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
           </div>
-          <div>
+          <div style={{ borderLeft:`3px solid ${T.teal}`, paddingLeft:10 }}>
+            <div style={{ fontSize:10, letterSpacing:"0.1em", textTransform:"uppercase", color:T.teal, fontFamily:SANS, marginBottom:6 }}>{names.b}</div>
             {bEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
           </div>
         </div>
       ) : (
+        // Single person
         <div>
           {entries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
         </div>
@@ -414,7 +493,10 @@ function StatsStrip({ entries, names, loveStartDate }) {
               fall in love
             </div>
           </div>
-          <div style={{ fontSize:32 }}>🌸</div>
+          <svg width="34" height="32" viewBox="0 0 34 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 29C17 29 3 20 3 11C3 6.58 6.58 3 11 3C13.9 3 16.46 4.6 17 6.2C17.54 4.6 20.1 3 23 3C27.42 3 31 6.58 31 11C31 20 17 29 17 29Z"
+              stroke="#BC5C58" strokeWidth="1.6" fill="rgba(188,92,88,0.10)" strokeLinejoin="round"/>
+          </svg>
         </div>
       )}
 
