@@ -110,8 +110,8 @@ const SANS    = "'DM Sans', sans-serif";
 // ─── Moods ───────────────────────────────────────────────
 const MOODS = [
   { n:1, label:"rough"     },
-  { n:2, label:"一般"       },
-  { n:3, label:"还可以"     },
+  { n:2, label:"okay"      },
+  { n:3, label:"pretty good" },
   { n:4, label:"wonderful" },
 ];
 
@@ -124,12 +124,12 @@ function FaceSvg({ index, size = 22, color }) {
       <circle cx="7.8" cy="10" r="1" fill="currentColor"/>
       <circle cx="14.2" cy="10" r="1" fill="currentColor"/>
       <path d="M8 15 Q11 12 14 15" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
-    // 2 一般
+    // 2 okay
     <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
       <circle cx="7.8" cy="10" r="1" fill="currentColor"/>
       <circle cx="14.2" cy="10" r="1" fill="currentColor"/>
       <path d="M8 14 L14 14" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
-    // 3 还可以
+    // 3 pretty good
     <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
       <path d="M7.2 9.4 Q8 8.7 8.8 9.4" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
       <path d="M13.2 9.4 Q14 8.7 14.8 9.4" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
@@ -648,11 +648,11 @@ function StatsStrip({ entries, names, loveStartDate }) {
               fall in love
             </div>
           </div>
-          <div aria-hidden="true" style={{ width:42, height:42, borderRadius:"50%", border:`1.5px solid ${T.roseBorder}`,
-            display:"flex", alignItems:"center", justifyContent:"center", color:T.rose,
-            background:T.roseDim, fontFamily:DISPLAY, fontSize:34, lineHeight:1, fontWeight:400 }}>
-            ♡
-          </div>
+          <svg aria-hidden="true" width="38" height="38" viewBox="0 0 38 38"
+            style={{ color:T.rose, opacity:0.9, flexShrink:0, filter:"drop-shadow(0 4px 10px rgba(60,48,36,0.08))" }}>
+            <path d="M19 30.2S8.1 23.8 5.2 17.5C3 12.7 5.7 8.5 10.3 8.5c3 0 5.2 1.8 6.1 4.1.9-2.3 3.1-4.1 6.1-4.1 4.6 0 7.3 4.2 5.1 9C24.9 23.8 19 30.2 19 30.2Z"
+              fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
       )}
 
@@ -812,12 +812,19 @@ function MonthCard({ month, dayEntries, onClick }) {
   const avg = all.length ? Math.round(all.reduce((s,e)=>s+e.hearts,0)/all.length) : 3;
   const mood = moodOf(avg);
   const days = dayEntries.length;
+  function handleOpen(ev) {
+    ev.preventDefault();
+    if (typeof onClick === "function") onClick();
+  }
+
   return (
-    <button onClick={onClick}
+    <div role="button" tabIndex={0} onClick={handleOpen}
+      onKeyDown={(ev)=>{ if (ev.key === "Enter" || ev.key === " ") handleOpen(ev); }}
       style={{
-        width:"100%", textAlign:"left", border:"none", padding:0, borderRadius:20, overflow:"hidden",
+        width:"100%", textAlign:"left", padding:0, borderRadius:20, overflow:"hidden",
         background:T.surface, borderWidth:1.5, borderStyle:"solid", borderColor:T.border,
-        boxShadow:"0 8px 24px rgba(60,48,36,0.08)", cursor:"pointer"
+        boxShadow:"0 8px 24px rgba(60,48,36,0.08)", cursor:"pointer",
+        touchAction:"manipulation", WebkitTapHighlightColor:"transparent", boxSizing:"border-box"
       }}>
       {cover ? (
         <div style={{ position:"relative", height:150, overflow:"hidden" }}>
@@ -850,7 +857,7 @@ function MonthCard({ month, dayEntries, onClick }) {
         <span style={{ fontSize:12, color:T.inkMid, fontFamily:SANS }}>Open this month</span>
         <span style={{ color:T.inkLight }}>→</span>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -1380,7 +1387,12 @@ export default function App() {
 
   function startEdit(e) { setEditEntry(e); setPage("edit"); }
   function goArchive() { setSelectedMonth(null); setPage("archive"); }
-  function openMonth(month) { setSelectedMonth(month); setPage("month"); }
+  function openMonth(month) {
+    if (!month) return;
+    setSelectedMonth(String(month));
+    setPage("month");
+    if (typeof window !== "undefined") window.requestAnimationFrame(()=>window.scrollTo({ top:0, behavior:"smooth" }));
+  }
 
   const filtered = entries
     .filter(e=>filter==="all"||e.writer===filter)
