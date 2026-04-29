@@ -134,12 +134,11 @@ function FaceSvg({ index, size = 22, color }) {
       <path d="M7.2 9.4 Q8 8.7 8.8 9.4" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
       <path d="M13.2 9.4 Q14 8.7 14.8 9.4" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
       <path d="M7.9 13.4 Q11 16.2 14.1 13.4" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
-    // 4 wonderful — line-art heart eyes inspired by 🥰, no yellow emoji
-    <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
-      <path d="M7.75 11.2C6.35 10.15 5.72 9.35 5.72 8.42C5.72 7.66 6.27 7.12 6.98 7.12C7.36 7.12 7.62 7.3 7.75 7.62C7.9 7.3 8.18 7.12 8.56 7.12C9.27 7.12 9.82 7.66 9.82 8.42C9.82 9.35 9.15 10.15 7.75 11.2Z" fill="none" strokeWidth="1.05" stroke="currentColor" strokeLinejoin="round"/>
-      <path d="M14.25 11.2C12.85 10.15 12.18 9.35 12.18 8.42C12.18 7.66 12.73 7.12 13.44 7.12C13.82 7.12 14.1 7.3 14.25 7.62C14.38 7.3 14.64 7.12 15.02 7.12C15.73 7.12 16.28 7.66 16.28 8.42C16.28 9.35 15.65 10.15 14.25 11.2Z" fill="none" strokeWidth="1.05" stroke="currentColor" strokeLinejoin="round"/>
-      <path d="M7.1 13.45 Q11 17.35 14.9 13.45" fill="none" strokeWidth="1.5" stroke="currentColor" strokeLinecap="round"/>
-      <path d="M6.2 12.45 L5.35 12.05 M15.8 12.45 L16.65 12.05" fill="none" strokeWidth="1" stroke="currentColor" strokeLinecap="round"/></>,
+    // 4 wonderful — cleaner monochrome heart-eyes face, inspired by 🥰 but not a yellow emoji
+    <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.35" stroke="currentColor"/>
+      <path d="M7.65 11C6.32 10.05 5.75 9.32 5.75 8.52C5.75 7.85 6.25 7.38 6.9 7.38C7.28 7.38 7.52 7.55 7.65 7.86C7.78 7.55 8.03 7.38 8.4 7.38C9.05 7.38 9.55 7.85 9.55 8.52C9.55 9.32 8.98 10.05 7.65 11Z" fill="currentColor"/>
+      <path d="M14.35 11C13.02 10.05 12.45 9.32 12.45 8.52C12.45 7.85 12.95 7.38 13.6 7.38C13.97 7.38 14.22 7.55 14.35 7.86C14.48 7.55 14.72 7.38 15.1 7.38C15.75 7.38 16.25 7.85 16.25 8.52C16.25 9.32 15.68 10.05 14.35 11Z" fill="currentColor"/>
+      <path d="M7.35 13.65 Q11 16.35 14.65 13.65" fill="none" strokeWidth="1.45" stroke="currentColor" strokeLinecap="round"/></>,
   ];
   return (
     <svg width={size} height={size} viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"
@@ -306,35 +305,131 @@ function PhotoStrip({ photos, onPhotoClick, compact=false }) {
 }
 
 // ─── Reaction bar ────────────────────────────────────────
-const REACTION_LIST = [
-  { key:"heart", emoji:"❤️"  },
-  { key:"haha",  emoji:"😄"  },
-  { key:"cheer", emoji:"💪"  },
-  { key:"hug",   emoji:"🤗"  },
+const DEFAULT_REACTIONS = [
+  { key:"heart", emoji:"❤️", label:"love" },
+  { key:"haha",  emoji:"😄", label:"laugh" },
+  { key:"move",  emoji:"🥺", label:"moved" },
+  { key:"cheer", emoji:"💪", label:"cheer" },
+  { key:"hug",   emoji:"🤗", label:"hug" },
 ];
+
+const EMOJI_PICKER = [
+  "❤️","💕","💖","💘","💌","🥰","😍","😘","😄","🥹","🥺","😭",
+  "✨","🌟","🫶","🤗","👏","💪","🙌","🍰","☕️","🍜","🍣","🍻",
+  "🌸","🌙","☀️","🎧","🎬","📸","🎁","🎉","🔥","💯"
+];
+
+const DEFAULT_REACTION_MAP = Object.fromEntries(DEFAULT_REACTIONS.map(r => [r.key, r.emoji]));
+
+function emojiToReactionKey(emoji) {
+  return "emoji_" + Array.from(emoji).map(ch => ch.codePointAt(0).toString(16)).join("_");
+}
+
+function reactionKeyToEmoji(key) {
+  if (DEFAULT_REACTION_MAP[key]) return DEFAULT_REACTION_MAP[key];
+  if (!key?.startsWith("emoji_")) return "•";
+  try {
+    return key
+      .slice(6)
+      .split("_")
+      .filter(Boolean)
+      .map(hex => String.fromCodePoint(parseInt(hex, 16)))
+      .join("");
+  } catch {
+    return "•";
+  }
+}
+
+function normalizeEmojiInput(value) {
+  return (value || "").trim().replace(/\s+/g, "").slice(0, 12);
+}
+
 function ReactionBar({ entryId, reactions={}, compact = false }) {
-  async function toggle(key) {
+  const [open, setOpen] = useState(false);
+  const [customEmoji, setCustomEmoji] = useState("");
+
+  const activeReactions = Object.entries(reactions || {})
+    .filter(([, count]) => Number(count) > 0)
+    .sort((a,b) => String(a[0]).localeCompare(String(b[0])));
+
+  async function toggleKey(key) {
     const current = reactions[key] || 0;
     await updateDoc(doc(db,"entries",entryId), {
       [`reactions.${key}`]: current > 0 ? 0 : 1
     });
   }
+
+  async function toggleEmoji(emoji) {
+    const clean = normalizeEmojiInput(emoji);
+    if (!clean) return;
+    await toggleKey(DEFAULT_REACTIONS.find(r => r.emoji === clean)?.key || emojiToReactionKey(clean));
+    setCustomEmoji("");
+    setOpen(false);
+  }
+
   return (
-    <div style={{ display:"flex", gap:compact ? 4 : 6, marginTop:compact ? 6 : 8, flexWrap:"wrap" }}>
-      {REACTION_LIST.map(r => {
-        const count = reactions[r.key] || 0;
-        const active = count > 0;
-        return (
-          <button key={r.key} onClick={()=>toggle(r.key)}
-            style={{ background: active ? "rgba(196,122,72,0.12)" : "transparent",
-              border:`1.5px solid ${active ? T.caramel : T.border}`,
-              borderRadius:20, padding:compact ? "2px 6px" : "3px 9px", fontSize:compact ? 12 : 14, cursor:"pointer",
-              display:"flex", alignItems:"center", gap:compact ? 2 : 4, transition:"all 0.18s" }}>
-            <span>{r.emoji}</span>
-            {active && <span style={{ fontSize:11, color:T.caramel, fontFamily:SANS, fontWeight:500 }}>{count}</span>}
+    <div style={{ position:"relative", marginTop:compact ? 6 : 8 }}>
+      <div style={{ display:"flex", gap:compact ? 4 : 6, flexWrap:"wrap", alignItems:"center" }}>
+        {activeReactions.map(([key, count]) => (
+          <button key={key} onClick={()=>toggleKey(key)}
+            aria-label={`remove reaction ${reactionKeyToEmoji(key)}`}
+            style={{
+              background:"rgba(196,122,72,0.10)", border:`1.5px solid ${T.caramel}`,
+              borderRadius:20, padding:compact ? "2px 6px" : "3px 9px", fontSize:compact ? 12 : 14,
+              cursor:"pointer", display:"flex", alignItems:"center", gap:compact ? 2 : 4,
+              transition:"all 0.18s", lineHeight:1.2
+            }}>
+            <span>{reactionKeyToEmoji(key)}</span>
+            <span style={{ fontSize:11, color:T.caramel, fontFamily:SANS, fontWeight:500 }}>{count}</span>
           </button>
-        );
-      })}
+        ))}
+
+        <button onClick={()=>setOpen(v=>!v)} aria-label="add reaction"
+          style={{
+            width:compact ? 23 : 27, height:compact ? 23 : 27, borderRadius:"50%",
+            border:`1.5px solid ${open ? T.caramel : T.border}`, background:open ? T.surface2 : "transparent",
+            color:open ? T.caramel : T.inkLight, cursor:"pointer", fontSize:compact ? 14 : 16,
+            lineHeight:1, display:"flex", alignItems:"center", justifyContent:"center",
+            padding:0, fontFamily:SANS
+          }}>
+          +
+        </button>
+      </div>
+
+      {open && (
+        <div style={{
+          position:"relative", zIndex:30, marginTop:8, width:compact ? 214 : 250, maxWidth:"100%",
+          background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:16,
+          boxShadow:"0 18px 48px rgba(28,24,20,0.18)", padding:10, boxSizing:"border-box"
+        }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(6, 1fr)", gap:6 }}>
+            {EMOJI_PICKER.map(emoji => (
+              <button key={emoji} onClick={()=>toggleEmoji(emoji)}
+                style={{
+                  border:`1px solid ${T.border}`, background:T.cloudDancer, borderRadius:10,
+                  height:compact ? 28 : 32, fontSize:compact ? 15 : 17, cursor:"pointer",
+                  display:"flex", alignItems:"center", justifyContent:"center"
+                }}>
+                {emoji}
+              </button>
+            ))}
+          </div>
+          <div style={{ display:"flex", gap:6, marginTop:8 }}>
+            <input value={customEmoji} onChange={e=>setCustomEmoji(e.target.value)}
+              placeholder="paste emoji"
+              style={{
+                flex:1, minWidth:0, background:T.cloudDancer, border:`1px solid ${T.border}`,
+                borderRadius:10, padding:"7px 8px", color:T.ink, fontFamily:SANS, fontSize:12,
+                outline:"none", boxSizing:"border-box"
+              }}/>
+            <button onClick={()=>toggleEmoji(customEmoji)}
+              style={{ border:"none", background:T.ink, color:T.cloudDancer, borderRadius:10,
+                padding:"0 10px", fontFamily:SANS, fontSize:12, cursor:"pointer" }}>
+              add
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
