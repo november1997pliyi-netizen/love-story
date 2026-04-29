@@ -104,8 +104,8 @@ function applyTheme(themeId = "warm") {
     }
   }
 }
-const DISPLAY = "'Cormorant Garamond', serif";
-const SANS    = "'DM Sans', sans-serif";
+const DISPLAY = "'Cormorant Garamond', 'Times New Roman', serif";
+const SANS    = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 // ─── Moods ───────────────────────────────────────────────
 const MOODS = [
@@ -341,21 +341,24 @@ function ReactionBar({ entryId, reactions={}, compact = false }) {
 
 // ─── Single entry card ───────────────────────────────────
 function MoodBadge({ mood, color = T.ink, glass = false, compact = false }) {
+  const moodColor = color;
   return (
     <div style={{
-      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:compact ? 1 : 3,
-      minWidth:compact ? 48 : 58, padding:compact ? "5px 7px 4px" : "6px 8px 5px", borderRadius:compact ? 13 : 15,
-      background: glass ? "rgba(28,24,20,0.24)" : T.surface,
-      border:`1px solid ${glass ? "rgba(255,255,255,0.28)" : T.border}`,
-      boxShadow: glass ? "0 6px 16px rgba(0,0,0,0.16)" : "0 4px 14px rgba(60,48,36,0.08)",
-      backdropFilter: glass ? "blur(5px)" : "none",
-      WebkitBackdropFilter: glass ? "blur(5px)" : "none",
+      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+      gap:compact ? 1 : 2, minWidth:compact ? 38 : 48,
+      padding:glass ? 0 : (compact ? "5px 7px 4px" : "6px 8px 5px"),
+      borderRadius:compact ? 12 : 14,
+      background: glass ? "transparent" : T.surface,
+      border: glass ? "none" : `1px solid ${T.border}`,
+      boxShadow: glass ? "none" : "0 4px 14px rgba(60,48,36,0.08)",
       pointerEvents:"none"
     }}>
-      <FaceSvg index={mood.n-1} size={compact ? 18 : 21} color={color}/>
+      <FaceSvg index={mood.n-1} size={compact ? 18 : 21} color={moodColor}/>
       <span style={{
-        fontSize:compact ? 8.5 : 10, lineHeight:1, color, fontFamily:SANS, letterSpacing:"0.035em",
-        textTransform:"lowercase", whiteSpace:"nowrap", textShadow: glass ? "0 1px 5px rgba(0,0,0,0.52)" : "none"
+        fontSize:compact ? 8.5 : 10, lineHeight:1, color:moodColor, fontFamily:SANS,
+        letterSpacing:"0.035em", textTransform:"lowercase", whiteSpace:"nowrap",
+        textShadow: glass ? "0 1px 3px rgba(0,0,0,0.72), 0 0 8px rgba(0,0,0,0.36)" : "none",
+        fontWeight:500
       }}>
         {mood.label}
       </span>
@@ -492,19 +495,28 @@ function HeaderRow({ e, c, names, mood, showMood = true, showAuthor = true, comp
 }
 
 function PhotoAuthorBadge({ e, c, names, compact = false }) {
+  const displayName = e.writer === "a" ? names.a : names.b;
   return (
     <div style={{
       position:"absolute", top:compact ? 7 : 10, left:compact ? 7 : 10,
-      fontSize:compact ? 8.5 : 10, fontFamily:SANS, letterSpacing:"0.13em",
-      textTransform:"uppercase", color:"white", lineHeight:1, maxWidth:compact ? "44%" : "52%",
-      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap",
-      padding:compact ? "4px 6px" : "5px 8px", borderRadius:999,
-      background:"rgba(28,24,20,0.22)",
-      border:"1px solid rgba(255,255,255,0.20)",
-      textShadow:"0 1px 5px rgba(0,0,0,0.66)",
+      display:"inline-flex", alignItems:"center", gap:compact ? 4 : 5,
+      maxWidth:compact ? "58%" : "62%", padding:compact ? "4px 7px" : "5px 9px",
+      borderRadius:999, background:c.text, color:T.cloudDancer,
+      border:"1px solid rgba(255,255,255,0.34)",
+      boxShadow:"0 3px 10px rgba(0,0,0,0.14)",
       pointerEvents:"none"
     }}>
-      {e.writer==="a" ? names.a : names.b}
+      <span style={{
+        width:compact ? 4 : 5, height:compact ? 4 : 5, borderRadius:"50%",
+        background:T.cloudDancer, opacity:0.9, flexShrink:0
+      }}/>
+      <span style={{
+        fontSize:compact ? 8.5 : 10, fontFamily:SANS, letterSpacing:"0.13em",
+        textTransform:"uppercase", lineHeight:1, overflow:"hidden", textOverflow:"ellipsis",
+        whiteSpace:"nowrap", fontWeight:600
+      }}>
+        {displayName}
+      </span>
     </div>
   );
 }
@@ -672,10 +684,10 @@ function StatsStrip({ entries, names, loveStartDate }) {
               fall in love
             </div>
           </div>
-          <svg aria-hidden="true" width="38" height="38" viewBox="0 0 38 38"
-            style={{ color:T.rose, opacity:0.9, flexShrink:0, filter:"drop-shadow(0 4px 10px rgba(60,48,36,0.08))" }}>
-            <path d="M19 30.2S8.1 23.8 5.2 17.5C3 12.7 5.7 8.5 10.3 8.5c3 0 5.2 1.8 6.1 4.1.9-2.3 3.1-4.1 6.1-4.1 4.6 0 7.3 4.2 5.1 9C24.9 23.8 19 30.2 19 30.2Z"
-              fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" />
+          <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24"
+            style={{ color:T.rose, opacity:0.82, flexShrink:0, marginRight:4 }}>
+            <path d="M12 21.1C8.2 17.75 3.1 14.2 3.1 9.6C3.1 6.9 5.15 5 7.65 5C9.35 5 10.75 5.86 12 7.48C13.25 5.86 14.65 5 16.35 5C18.85 5 20.9 6.9 20.9 9.6C20.9 14.2 15.8 17.75 12 21.1Z"
+              fill="currentColor" />
           </svg>
         </div>
       )}
@@ -1349,9 +1361,28 @@ export default function App() {
   const [previewEntry, setPreviewEntry]   = useState(null);
 
   useEffect(() => {
-    const link=document.createElement("link"); link.rel="stylesheet";
-    link.href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap";
-    document.head.appendChild(link);
+    if (!document.getElementById("chapters-fonts")) {
+      const preconnect1 = document.createElement("link");
+      preconnect1.rel = "preconnect";
+      preconnect1.href = "https://fonts.googleapis.com";
+      document.head.appendChild(preconnect1);
+
+      const preconnect2 = document.createElement("link");
+      preconnect2.rel = "preconnect";
+      preconnect2.href = "https://fonts.gstatic.com";
+      preconnect2.crossOrigin = "anonymous";
+      document.head.appendChild(preconnect2);
+
+      const link=document.createElement("link");
+      link.id="chapters-fonts";
+      link.rel="stylesheet";
+      link.href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap";
+      document.head.appendChild(link);
+    }
+    document.documentElement.style.fontFamily=SANS;
+    document.body.style.fontFamily=SANS;
+    document.body.style.webkitFontSmoothing="antialiased";
+    document.body.style.mozOsxFontSmoothing="grayscale";
     document.body.style.margin="0";
 
     getDoc(doc(db,"config","names")).then(s=>{ if(s.exists()) setNames(s.data()); });
