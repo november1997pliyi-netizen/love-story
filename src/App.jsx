@@ -109,48 +109,42 @@ const SANS    = "'DM Sans', sans-serif";
 
 // ─── Moods ───────────────────────────────────────────────
 const MOODS = [
-  { n:1, label:"rough day"   },
-  { n:2, label:"it was okay" },
-  { n:3, label:"pretty good" },
-  { n:4, label:"so sweet"    },
-  { n:5, label:"wonderful"   },
+  { n:1, label:"rough"     },
+  { n:2, label:"一般"       },
+  { n:3, label:"还可以"     },
+  { n:4, label:"wonderful" },
 ];
 
 // ─── Face SVGs ───────────────────────────────────────────
 function FaceSvg({ index, size = 22, color }) {
+  const safeIndex = Math.max(0, Math.min(3, index));
   const faces = [
-    // 1 sad
+    // 1 rough
     <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
       <circle cx="7.8" cy="10" r="1" fill="currentColor"/>
       <circle cx="14.2" cy="10" r="1" fill="currentColor"/>
       <path d="M8 15 Q11 12 14 15" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
-    // 2 meh
+    // 2 一般
     <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
       <circle cx="7.8" cy="10" r="1" fill="currentColor"/>
       <circle cx="14.2" cy="10" r="1" fill="currentColor"/>
       <path d="M8 14 L14 14" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
-    // 3 smile
+    // 3 还可以
     <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
-      <circle cx="7.8" cy="10" r="1" fill="currentColor"/>
-      <circle cx="14.2" cy="10" r="1" fill="currentColor"/>
-      <path d="M8 13.5 Q11 16.5 14 13.5" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
-    // 4 big smile
+      <path d="M7.2 9.4 Q8 8.7 8.8 9.4" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
+      <path d="M13.2 9.4 Q14 8.7 14.8 9.4" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
+      <path d="M7.9 13.4 Q11 16.2 14.1 13.4" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
+    // 4 wonderful — line-art heart eyes inspired by 🥰, no yellow emoji
     <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
-      <path d="M7.5 8.8 Q8 7.8 9 8.8" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
-      <path d="M13 8.8 Q14 7.8 14.5 8.8" fill="none" strokeWidth="1.2" stroke="currentColor" strokeLinecap="round"/>
-      <path d="M7.5 13.2 Q11 17.5 14.5 13.2" fill="none" strokeWidth="1.4" stroke="currentColor" strokeLinecap="round"/></>,
-    // 5 wonderful — heart eyes + huge grin
-    <><circle cx="11" cy="11" r="9.5" fill="none" strokeWidth="1.4" stroke="currentColor"/>
-      <path d="M7.8 11.25C6.35 10.15 5.65 9.35 5.65 8.35C5.65 7.55 6.25 7.02 6.98 7.02C7.38 7.02 7.66 7.22 7.8 7.55C7.96 7.22 8.25 7.02 8.65 7.02C9.38 7.02 9.98 7.55 9.98 8.35C9.98 9.35 9.25 10.15 7.8 11.25Z" fill="currentColor" stroke="none"/>
-      <path d="M14.2 11.25C12.75 10.15 12.02 9.35 12.02 8.35C12.02 7.55 12.62 7.02 13.35 7.02C13.75 7.02 14.04 7.22 14.2 7.55C14.34 7.22 14.62 7.02 15.02 7.02C15.75 7.02 16.35 7.55 16.35 8.35C16.35 9.35 15.65 10.15 14.2 11.25Z" fill="currentColor" stroke="none"/>
-      <path d="M6.6 13.4 Q11 18.2 15.4 13.4" fill="none" strokeWidth="1.55" stroke="currentColor" strokeLinecap="round"/>
-      <path d="M3.1 5.2 L3.55 6.15 M3.95 4.1 L3.8 5.25 M5 4.75 L4.1 5.45" fill="none" strokeWidth="1" stroke="currentColor" strokeLinecap="round"/>
-      <path d="M18.9 5.2 L18.45 6.15 M18.05 4.1 L18.2 5.25 M17 4.75 L17.9 5.45" fill="none" strokeWidth="1" stroke="currentColor" strokeLinecap="round"/></>,
+      <path d="M7.75 11.2C6.35 10.15 5.72 9.35 5.72 8.42C5.72 7.66 6.27 7.12 6.98 7.12C7.36 7.12 7.62 7.3 7.75 7.62C7.9 7.3 8.18 7.12 8.56 7.12C9.27 7.12 9.82 7.66 9.82 8.42C9.82 9.35 9.15 10.15 7.75 11.2Z" fill="none" strokeWidth="1.05" stroke="currentColor" strokeLinejoin="round"/>
+      <path d="M14.25 11.2C12.85 10.15 12.18 9.35 12.18 8.42C12.18 7.66 12.73 7.12 13.44 7.12C13.82 7.12 14.1 7.3 14.25 7.62C14.38 7.3 14.64 7.12 15.02 7.12C15.73 7.12 16.28 7.66 16.28 8.42C16.28 9.35 15.65 10.15 14.25 11.2Z" fill="none" strokeWidth="1.05" stroke="currentColor" strokeLinejoin="round"/>
+      <path d="M7.1 13.45 Q11 17.35 14.9 13.45" fill="none" strokeWidth="1.5" stroke="currentColor" strokeLinecap="round"/>
+      <path d="M6.2 12.45 L5.35 12.05 M15.8 12.45 L16.65 12.05" fill="none" strokeWidth="1" stroke="currentColor" strokeLinecap="round"/></>,
   ];
   return (
     <svg width={size} height={size} viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"
       style={{ color, display:"block", flexShrink:0 }}>
-      {faces[Math.max(0, Math.min(4, index))]}
+      {faces[safeIndex]}
     </svg>
   );
 }
@@ -158,7 +152,12 @@ function FaceSvg({ index, size = 22, color }) {
 // ─── Utils ───────────────────────────────────────────────
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function today() { return new Date().toISOString().split("T")[0]; }
-function moodOf(n) { return MOODS.find(m => m.n === n) || MOODS[2]; }
+function normalizeMoodValue(n) {
+  const v = Number(n) || 3;
+  if (v >= MOODS.length) return MOODS.length; // keep old 5-star records as wonderful
+  return Math.max(1, v);
+}
+function moodOf(n) { return MOODS.find(m => m.n === normalizeMoodValue(n)) || MOODS[2]; }
 
 function fmtDate(d) {
   if (!d) return "";
@@ -238,14 +237,16 @@ function dayLabel(d) {
 
 // ─── Field ───────────────────────────────────────────────
 const fieldBase = {
-  width:"100%", background:T.cloudDancer, border:`1.5px solid ${T.border}`,
+  display:"block", width:"100%", maxWidth:"100%", minWidth:0, height:44,
+  background:T.cloudDancer, border:`1.5px solid ${T.border}`,
   borderRadius:11, padding:"11px 14px", fontSize:15, fontFamily:SANS,
   color:T.ink, outline:"none", boxSizing:"border-box", transition:"border-color 0.2s",
+  appearance:"none", WebkitAppearance:"none",
 };
 function Field({ label, icon, value, onChange, placeholder, type="text" }) {
   const [focused, setFocused] = useState(false);
   return (
-    <div style={{ marginBottom:"1rem" }}>
+    <div style={{ marginBottom:"1rem", width:"100%", maxWidth:"100%", boxSizing:"border-box" }}>
       <div style={{ fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", color:T.inkLight, marginBottom:6, fontFamily:SANS }}>{icon}&nbsp;&nbsp;{label}</div>
       <input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
         onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)}
@@ -311,7 +312,7 @@ const REACTION_LIST = [
   { key:"cheer", emoji:"💪"  },
   { key:"hug",   emoji:"🤗"  },
 ];
-function ReactionBar({ entryId, reactions={} }) {
+function ReactionBar({ entryId, reactions={}, compact = false }) {
   async function toggle(key) {
     const current = reactions[key] || 0;
     await updateDoc(doc(db,"entries",entryId), {
@@ -319,7 +320,7 @@ function ReactionBar({ entryId, reactions={} }) {
     });
   }
   return (
-    <div style={{ display:"flex", gap:6, marginTop:8 }}>
+    <div style={{ display:"flex", gap:compact ? 4 : 6, marginTop:compact ? 6 : 8, flexWrap:"wrap" }}>
       {REACTION_LIST.map(r => {
         const count = reactions[r.key] || 0;
         const active = count > 0;
@@ -327,8 +328,8 @@ function ReactionBar({ entryId, reactions={} }) {
           <button key={r.key} onClick={()=>toggle(r.key)}
             style={{ background: active ? "rgba(196,122,72,0.12)" : "transparent",
               border:`1.5px solid ${active ? T.caramel : T.border}`,
-              borderRadius:20, padding:"3px 9px", fontSize:14, cursor:"pointer",
-              display:"flex", alignItems:"center", gap:4, transition:"all 0.18s" }}>
+              borderRadius:20, padding:compact ? "2px 6px" : "3px 9px", fontSize:compact ? 12 : 14, cursor:"pointer",
+              display:"flex", alignItems:"center", gap:compact ? 2 : 4, transition:"all 0.18s" }}>
             <span>{r.emoji}</span>
             {active && <span style={{ fontSize:11, color:T.caramel, fontFamily:SANS, fontWeight:500 }}>{count}</span>}
           </button>
@@ -339,22 +340,22 @@ function ReactionBar({ entryId, reactions={} }) {
 }
 
 // ─── Single entry card ───────────────────────────────────
-function MoodBadge({ mood, color = T.ink, glass = false }) {
+function MoodBadge({ mood, color = T.ink, glass = false, compact = false }) {
   return (
     <div style={{
-      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:3,
-      minWidth:64, padding:"7px 9px 6px", borderRadius:16,
-      background: glass ? "rgba(28,24,20,0.46)" : T.surface,
-      border:`1px solid ${glass ? "rgba(255,255,255,0.34)" : T.border}`,
-      boxShadow: glass ? "0 8px 22px rgba(0,0,0,0.18)" : "0 4px 14px rgba(60,48,36,0.08)",
-      backdropFilter: glass ? "blur(10px)" : "none",
-      WebkitBackdropFilter: glass ? "blur(10px)" : "none",
+      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:compact ? 1 : 3,
+      minWidth:compact ? 48 : 58, padding:compact ? "5px 7px 4px" : "6px 8px 5px", borderRadius:compact ? 13 : 15,
+      background: glass ? "rgba(28,24,20,0.24)" : T.surface,
+      border:`1px solid ${glass ? "rgba(255,255,255,0.28)" : T.border}`,
+      boxShadow: glass ? "0 6px 16px rgba(0,0,0,0.16)" : "0 4px 14px rgba(60,48,36,0.08)",
+      backdropFilter: glass ? "blur(5px)" : "none",
+      WebkitBackdropFilter: glass ? "blur(5px)" : "none",
       pointerEvents:"none"
     }}>
-      <FaceSvg index={mood.n-1} size={22} color={color}/>
+      <FaceSvg index={mood.n-1} size={compact ? 18 : 21} color={color}/>
       <span style={{
-        fontSize:10, lineHeight:1, color, fontFamily:SANS, letterSpacing:"0.04em",
-        textTransform:"lowercase", whiteSpace:"nowrap", textShadow: glass ? "0 1px 5px rgba(0,0,0,0.35)" : "none"
+        fontSize:compact ? 8.5 : 10, lineHeight:1, color, fontFamily:SANS, letterSpacing:"0.035em",
+        textTransform:"lowercase", whiteSpace:"nowrap", textShadow: glass ? "0 1px 5px rgba(0,0,0,0.52)" : "none"
       }}>
         {mood.label}
       </span>
@@ -362,53 +363,59 @@ function MoodBadge({ mood, color = T.ink, glass = false }) {
   );
 }
 
-function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick }) {
+function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick, compact = false }) {
   const [hov, setHov] = useState(false);
   const c = COL[e.writer];
   const mood = moodOf(e.hearts);
   const photos = getPhotos(e);
   const hasPhoto = photos.length > 0;
 
+  const cardRadius = compact ? 15 : 18;
+  const innerPad = compact ? 7 : 12;
+  const photoRadius = compact ? 12 : 15;
+
   return (
     <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
       style={{ background: T.cloudDancer, border:`1.5px solid ${hov?c.border:T.border}`,
-        borderRadius:18, overflow:"hidden", transition:"all 0.25s",
+        borderRadius:cardRadius, overflow:"hidden", transition:"all 0.25s",
         transform:hov?"translateY(-2px)":"none",
         boxShadow:hov?"0 8px 28px rgba(60,48,36,0.12)":"0 1px 4px rgba(60,48,36,0.06)",
-        marginBottom:14, width:"100%", maxWidth:"100%", boxSizing:"border-box" }}>
+        marginBottom:compact ? 10 : 14, width:"100%", maxWidth:"100%", minWidth:0, boxSizing:"border-box" }}>
 
       {/* Accent line */}
       <div style={{ height:3, background:`linear-gradient(90deg,${c.text}88,transparent)` }}/>
 
       {hasPhoto ? (
         <div>
-          {/* Main photo with mood badge at upper-right */}
-          <div style={{ padding:"12px 12px 0" }}>
+          {/* Main photo */}
+          <div style={{ padding:`${innerPad}px ${innerPad}px 0` }}>
             <div style={{
-              position:"relative", overflow:"hidden", borderRadius:15, background:"white",
+              position:"relative", overflow:"hidden", borderRadius:photoRadius, background:"white",
               boxShadow:"0 4px 16px rgba(60,48,36,0.14)"
             }}>
               <img
                 src={photos[0]}
                 onClick={()=>onPhotoClick&&onPhotoClick(photos[0])}
-                style={{ display:"block", width:"100%", height:"auto", maxHeight:300,
+                style={{ display:"block", width:"100%", height:compact ? 178 : "auto", maxHeight:compact ? 178 : 300,
                   objectFit:"cover", cursor:"zoom-in" }}
               />
 
-              <PhotoInfoOverlay e={e}/>
+              <PhotoAuthorBadge e={e} c={c} names={names} compact={compact}/>
+              <PhotoInfoOverlay e={e} compact={compact}/>
 
-              <div style={{ position:"absolute", top:10, right:10 }}>
-                <MoodBadge mood={mood} color="white" glass={true}/>
+              <div style={{ position:"absolute", top:compact ? 7 : 10, right:compact ? 7 : 10 }}>
+                <MoodBadge mood={mood} color="white" glass={true} compact={compact}/>
               </div>
 
               {photos.length > 1 && (
                 <div style={{
-                  position:"absolute", left:10, top:10, background:"rgba(28,24,20,0.44)",
-                  color:"white", border:"1px solid rgba(255,255,255,0.26)", borderRadius:999,
-                  padding:"3px 9px", fontSize:11, fontFamily:SANS, letterSpacing:"0.06em",
-                  backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)"
+                  position:"absolute", right:compact ? 7 : 10, bottom:compact ? 7 : 10,
+                  color:"white", border:"1px solid rgba(255,255,255,0.24)", borderRadius:999,
+                  padding:compact ? "2px 6px" : "3px 9px", fontSize:compact ? 9 : 11,
+                  fontFamily:SANS, letterSpacing:"0.05em", background:"rgba(28,24,20,0.20)",
+                  textShadow:"0 1px 4px rgba(0,0,0,0.65)", pointerEvents:"none"
                 }}>
-                  +{photos.length-1} photos
+                  +{photos.length-1}
                 </div>
               )}
             </div>
@@ -416,132 +423,156 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick }) {
 
           {/* Extra photos as a compact strip */}
           {photos.length > 1 && (
-            <div style={{ display:"flex", gap:6, margin:"10px 12px 0", overflowX:"auto",
+            <div style={{ display:"flex", gap:compact ? 4 : 6, margin:`${compact ? 7 : 10}px ${innerPad}px 0`, overflowX:"auto",
               scrollSnapType:"x mandatory", WebkitOverflowScrolling:"touch", paddingBottom:4 }}>
               {photos.slice(1).map((src,i)=>(
                 <div key={i} onClick={()=>onPhotoClick&&onPhotoClick(src)}
                   style={{ flexShrink:0, scrollSnapAlign:"start",
-                    background:"white", padding:"4px 4px 12px",
+                    background:"white", padding:compact ? "3px 3px 9px" : "4px 4px 12px",
                     boxShadow:"0 2px 8px rgba(60,48,36,0.14)",
                     transform:`rotate(${TILTS[(i+1)%TILTS.length]}deg)`,
-                    cursor:"zoom-in", width:64 }}>
-                  <img src={src} style={{ display:"block", width:"100%", height:50, objectFit:"cover" }}/>
+                    cursor:"zoom-in", width:compact ? 46 : 64 }}>
+                  <img src={src} style={{ display:"block", width:"100%", height:compact ? 36 : 50, objectFit:"cover" }}/>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Text below image */}
-          <div style={{ margin:"10px 12px 0", background:T.surface,
-            border:`1px solid ${T.border}`, borderRadius:14, padding:"10px 14px 12px",
+          {/* Notes + actions below image */}
+          <div style={{ margin:`${compact ? 7 : 10}px ${innerPad}px 0`, background:T.surface,
+            border:`1px solid ${T.border}`, borderRadius:compact ? 12 : 14,
+            padding:compact ? "8px 8px 10px" : "10px 14px 12px",
             boxShadow:"0 4px 12px rgba(60,48,36,0.06)" }}>
-            <HeaderRow e={e} c={c} names={names} mood={mood} showMood={false}/>
-            <TextBody e={e} hideMeta={true}/>
-            <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview}/>
+            <HeaderRow e={e} c={c} names={names} mood={mood} showMood={false} showAuthor={false} compact={compact}/>
+            <TextBody e={e} hideMeta={true} compact={compact}/>
+            <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} compact={compact}/>
           </div>
         </div>
       ) : (
         // ── Text only layout ──
-        <div style={{ padding:"12px 15px 11px" }}>
-          <HeaderRow e={e} c={c} names={names} mood={mood}/>
-          <TextBody e={e}/>
-          <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview}/>
+        <div style={{ padding:compact ? "10px 9px 9px" : "12px 15px 11px" }}>
+          <HeaderRow e={e} c={c} names={names} mood={mood} compact={compact}/>
+          <TextBody e={e} compact={compact}/>
+          <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} compact={compact}/>
         </div>
       )}
 
       {/* Reactions */}
-      <div style={{ padding:"0 15px 11px" }}>
-        <ReactionBar entryId={e.id} reactions={e.reactions}/>
+      <div style={{ padding:compact ? "0 8px 9px" : "0 15px 11px" }}>
+        <ReactionBar entryId={e.id} reactions={e.reactions} compact={compact}/>
       </div>
     </div>
   );
 }
 
-function HeaderRow({ e, c, names, mood, showMood = true }) {
+
+function HeaderRow({ e, c, names, mood, showMood = true, showAuthor = true, compact = false }) {
   return (
-    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8, flexWrap:"wrap", gap:4 }}>
-      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        <span style={{ fontSize:11, fontFamily:SANS, letterSpacing:"0.1em", textTransform:"uppercase",
-          color:c.text, background:c.dim, padding:"3px 9px", borderRadius:20 }}>
-          {e.writer==="a" ? names.a : names.b}
-        </span>
+    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:compact ? 6 : 8, flexWrap:"wrap", gap:4, minWidth:0 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:compact ? 5 : 8, minWidth:0 }}>
+        {showAuthor && (
+          <span style={{ fontSize:compact ? 9 : 11, fontFamily:SANS, letterSpacing:"0.1em", textTransform:"uppercase",
+            color:c.text, background:c.dim, padding:compact ? "2px 7px" : "3px 9px", borderRadius:20,
+            maxWidth:"100%", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+            {e.writer==="a" ? names.a : names.b}
+          </span>
+        )}
         {showMood && (
           <>
-            <FaceSvg index={e.hearts-1} size={18} color={c.text}/>
-            <span style={{ fontSize:11, color:T.inkLight, fontFamily:SANS }}>{mood.label}</span>
+            <FaceSvg index={normalizeMoodValue(e.hearts)-1} size={compact ? 16 : 18} color={c.text}/>
+            <span style={{ fontSize:compact ? 10 : 11, color:T.inkLight, fontFamily:SANS }}>{mood.label}</span>
           </>
         )}
       </div>
-      <span style={{ fontSize:12, color:T.inkLight, fontFamily:SANS }}>
+      <span style={{ fontSize:compact ? 10 : 12, color:T.inkLight, fontFamily:SANS, marginLeft:"auto" }}>
         {fmtTime(e.at)}
       </span>
     </div>
   );
 }
 
-function PhotoInfoOverlay({ e }) {
+function PhotoAuthorBadge({ e, c, names, compact = false }) {
+  return (
+    <div style={{
+      position:"absolute", top:compact ? 7 : 10, left:compact ? 7 : 10,
+      fontSize:compact ? 8.5 : 10, fontFamily:SANS, letterSpacing:"0.13em",
+      textTransform:"uppercase", color:"white", lineHeight:1, maxWidth:compact ? "44%" : "52%",
+      overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap",
+      padding:compact ? "4px 6px" : "5px 8px", borderRadius:999,
+      background:"rgba(28,24,20,0.22)",
+      border:"1px solid rgba(255,255,255,0.20)",
+      textShadow:"0 1px 5px rgba(0,0,0,0.66)",
+      pointerEvents:"none"
+    }}>
+      {e.writer==="a" ? names.a : names.b}
+    </div>
+  );
+}
+
+
+function PhotoInfoOverlay({ e, compact = false }) {
   if (!e.location && !e.food) return null;
 
+  const rowStyle = {
+    display:"flex", gap:compact ? 4 : 6, alignItems:"flex-start",
+    minWidth:0, maxWidth:"100%"
+  };
+  const iconStyle = {
+    fontSize:compact ? 9.5 : 11, lineHeight:compact ? "14px" : "17px",
+    color:"rgba(255,255,255,0.92)", textShadow:"0 1px 5px rgba(0,0,0,0.75)",
+    flexShrink:0
+  };
+  const textStyle = {
+    fontSize:compact ? 10.5 : 13, lineHeight:1.32, fontFamily:SANS, color:"white",
+    textShadow:"0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,0,0,0.55)",
+    overflowWrap:"anywhere", fontWeight:500
+  };
+
   return (
-    <>
-      <div style={{
-        position:"absolute", inset:0, pointerEvents:"none",
-        background:"linear-gradient(to bottom, rgba(28,24,20,0.06) 0%, rgba(28,24,20,0) 38%, rgba(28,24,20,0.72) 100%)"
-      }}/>
-      <div style={{
-        position:"absolute", left:0, right:0, bottom:0, padding:"38px 12px 12px",
-        color:"white", pointerEvents:"none"
-      }}>
-        <div style={{
-          display:"inline-flex", flexDirection:"column", gap:5, maxWidth:"calc(100% - 8px)",
-          padding:"8px 10px", borderRadius:14,
-          background:"rgba(28,24,20,0.36)", border:"1px solid rgba(255,255,255,0.22)",
-          boxShadow:"0 8px 26px rgba(0,0,0,0.24)",
-          backdropFilter:"blur(10px)", WebkitBackdropFilter:"blur(10px)"
-        }}>
-          {e.location && (
-            <div style={{ display:"flex", gap:7, alignItems:"flex-start" }}>
-              <span style={{ fontSize:12, lineHeight:"18px", opacity:0.82 }}>◎</span>
-              <span style={{
-                fontSize:13, lineHeight:1.35, fontFamily:SANS, color:"white",
-                textShadow:"0 1px 4px rgba(0,0,0,0.42)",
-                overflowWrap:"anywhere"
-              }}>{e.location}</span>
-            </div>
-          )}
-          {e.food && (
-            <div style={{ display:"flex", gap:7, alignItems:"flex-start" }}>
-              <span style={{ fontSize:12, lineHeight:"18px", opacity:0.82 }}>◈</span>
-              <span style={{
-                fontSize:13, lineHeight:1.35, fontFamily:SANS, color:"white",
-                textShadow:"0 1px 4px rgba(0,0,0,0.42)",
-                overflowWrap:"anywhere"
-              }}>{e.food}</span>
-            </div>
-          )}
+    <div style={{
+      position:"absolute", left:compact ? 8 : 12, right:compact ? 8 : 12, bottom:compact ? 8 : 12,
+      color:"white", pointerEvents:"none", display:"flex", flexDirection:"column",
+      gap:compact ? 3 : 4, alignItems:"flex-start", maxWidth:"calc(100% - 24px)"
+    }}>
+      {e.location && (
+        <div style={rowStyle}>
+          <span style={iconStyle}>◎</span>
+          <span style={textStyle}>{e.location}</span>
         </div>
-      </div>
-    </>
+      )}
+      {e.food && (
+        <div style={rowStyle}>
+          <span style={iconStyle}>◈</span>
+          <span style={textStyle}>{e.food}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
-function TextBody({ e, hideMeta = false }) {
+
+function TextBody({ e, hideMeta = false, compact = false }) {
   return (
     <>
-      {!hideMeta && e.location && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◎</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.location}</span></div>}
-      {!hideMeta && e.food     && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◈</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.food}</span></div>}
-      {e.notes    && <div style={{ marginTop:hideMeta?0:8, paddingTop:hideMeta?0:8, borderTop:hideMeta?"none":`1px solid ${T.border}`, fontSize:16, color:T.inkMid, fontFamily:DISPLAY, fontStyle:"italic", lineHeight:1.6 }}>"{e.notes}"</div>}
+      {!hideMeta && e.location && <div style={{ display:"flex", gap:compact ? 5 : 8, marginBottom:4 }}><span style={{ fontSize:compact ? 10 : 12, color:T.inkLight }}>◎</span><span style={{ fontSize:compact ? 12 : 14, color:T.ink, fontFamily:SANS, lineHeight:1.45, overflowWrap:"anywhere" }}>{e.location}</span></div>}
+      {!hideMeta && e.food     && <div style={{ display:"flex", gap:compact ? 5 : 8, marginBottom:4 }}><span style={{ fontSize:compact ? 10 : 12, color:T.inkLight }}>◈</span><span style={{ fontSize:compact ? 12 : 14, color:T.ink, fontFamily:SANS, lineHeight:1.45, overflowWrap:"anywhere" }}>{e.food}</span></div>}
+      {e.notes    && <div style={{ marginTop:hideMeta?0:8, paddingTop:hideMeta?0:8, borderTop:hideMeta?"none":`1px solid ${T.border}`, fontSize:compact ? 13 : 16, color:T.inkMid, fontFamily:DISPLAY, fontStyle:"italic", lineHeight:1.55, overflowWrap:"anywhere" }}>"{e.notes}"</div>}
     </>
   );
 }
 
-function ActionRow({ e, onEdit, onRemove, onPreview }) {
+
+function ActionRow({ e, onEdit, onRemove, onPreview, compact = false }) {
   const btnStyle = (col) => ({
-    background:"none", border:"none", fontSize:11, color:T.inkLight, cursor:"pointer",
-    padding:0, fontFamily:SANS, letterSpacing:"0.05em", transition:"color 0.15s"
+    background:"none", border:"none", fontSize:compact ? 9.5 : 11, color:T.inkLight, cursor:"pointer",
+    padding:0, fontFamily:SANS, letterSpacing:"0.04em", transition:"color 0.15s",
+    whiteSpace:"nowrap"
   });
   return (
-    <div style={{ display:"flex", gap:12, marginTop:8, paddingTop:8, borderTop:`1px solid ${T.border}` }}>
+    <div style={{
+      display:"flex", gap:compact ? 8 : 12, marginTop:compact ? 7 : 8, paddingTop:compact ? 7 : 8,
+      borderTop:`1px solid ${T.border}`, minWidth:0, overflow:"hidden", flexWrap:"wrap"
+    }}>
       <button style={btnStyle(T.teal)} onClick={()=>onPreview(e)}
         onMouseEnter={ev=>ev.target.style.color=T.teal} onMouseLeave={ev=>ev.target.style.color=T.inkLight}>preview ↗</button>
       <button style={btnStyle(T.caramel)} onClick={()=>onEdit(e)}
@@ -552,54 +583,42 @@ function ActionRow({ e, onEdit, onRemove, onPreview }) {
   );
 }
 
-function useIsMobile(breakpoint = 720) {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth <= breakpoint : false
-  );
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onResize = () => setIsMobile(window.innerWidth <= breakpoint);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [breakpoint]);
-
-  return isMobile;
-}
-
 // ─── Day group (same day, both people) ───────────────────
 function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoClick }) {
   const isMobile = useIsMobile();
   const aEntries = entries.filter(e=>e.writer==="a");
   const bEntries = entries.filter(e=>e.writer==="b");
   const bothWrote = aEntries.length > 0 && bEntries.length > 0;
+  const compact = isMobile;
 
   return (
-    <div style={{ marginBottom:24, width:"100%", maxWidth:"100%", boxSizing:"border-box", overflowX:"hidden" }}>
+    <div style={{ marginBottom:compact ? 18 : 24, width:"100%", maxWidth:"100%", minWidth:0, boxSizing:"border-box", overflowX:"hidden" }}>
       {/* Day header */}
-      <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12, width:"100%" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:compact ? 7 : 10, marginBottom:compact ? 9 : 12, width:"100%" }}>
         <div style={{ height:1, flex:1, background:T.border }}/>
-        <span style={{ fontSize:12, color:T.inkMid, fontFamily:SANS, letterSpacing:"0.08em",
-          background:T.cloudDancer, padding:"3px 12px", border:`1.5px solid ${T.border}`,
+        <span style={{ fontSize:compact ? 11 : 12, color:T.inkMid, fontFamily:SANS, letterSpacing:"0.08em",
+          background:T.cloudDancer, padding:compact ? "3px 10px" : "3px 12px", border:`1.5px solid ${T.border}`,
           borderRadius:20, whiteSpace:"nowrap" }}>
           {dayLabel(date)}
         </span>
         <div style={{ height:1, flex:1, background:T.border }}/>
       </div>
 
-      {bothWrote && !isMobile ? (
-        <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)", gap:10, width:"100%" }}>
-          <div style={{ minWidth:0 }}>
-            {aEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
+      {bothWrote ? (
+        <div style={{
+          display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)",
+          gap:compact ? 6 : 10, width:"100%", maxWidth:"100%", minWidth:0, boxSizing:"border-box"
+        }}>
+          <div style={{ minWidth:0, maxWidth:"100%", overflow:"hidden" }}>
+            {aEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>)}
           </div>
-          <div style={{ minWidth:0 }}>
-            {bEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
+          <div style={{ minWidth:0, maxWidth:"100%", overflow:"hidden" }}>
+            {bEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>)}
           </div>
         </div>
       ) : (
-        <div style={{ width:"100%", maxWidth:"100%" }}>
-          {entries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
+        <div style={{ width:"100%", maxWidth:"100%", minWidth:0 }}>
+          {entries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>)}
         </div>
       )}
     </div>
@@ -629,13 +648,10 @@ function StatsStrip({ entries, names, loveStartDate }) {
               fall in love
             </div>
           </div>
-          <div aria-hidden="true" style={{ width:42, height:42, borderRadius:"50%", border:`1.5px solid ${T.border}`,
-            display:"flex", alignItems:"center", justifyContent:"center", color:T.caramel,
-            background:"rgba(255,255,255,0.20)" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6.5 12c1.8-3.1 4-4.7 5.5-4.7s3.7 1.6 5.5 4.7c-1.8 3.1-4 4.7-5.5 4.7S8.3 15.1 6.5 12Z" />
-              <path d="M8.4 12c1.2-1.7 2.4-2.6 3.6-2.6s2.4.9 3.6 2.6c-1.2 1.7-2.4 2.6-3.6 2.6s-2.4-.9-3.6-2.6Z" />
-            </svg>
+          <div aria-hidden="true" style={{ width:42, height:42, borderRadius:"50%", border:`1.5px solid ${T.roseBorder}`,
+            display:"flex", alignItems:"center", justifyContent:"center", color:T.rose,
+            background:T.roseDim, fontFamily:DISPLAY, fontSize:34, lineHeight:1, fontWeight:400 }}>
+            ♡
           </div>
         </div>
       )}
@@ -842,7 +858,7 @@ function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilte
   const monthDayGroups = groupByMonthDay(filtered);
   return (
     <div style={{ minHeight:"100vh", width:"100%", maxWidth:"100%", overflowX:"hidden", background:T.cloudDancer, fontFamily:SANS, boxSizing:"border-box" }}>
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"1.5rem 1rem 0" }}>
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"1.5rem clamp(0.55rem, 3vw, 1rem) 0" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"1.2rem" }}>
           <div>
             <div style={{ fontFamily:DISPLAY, fontSize:46, color:T.ink, fontStyle:"italic", fontWeight:500, lineHeight:1 }}>Chapters</div>
@@ -864,7 +880,7 @@ function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilte
         <FilterSearchControls entries={entries} filtered={filtered} names={names} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} showSearch={showSearch} setShowSearch={setShowSearch}/>
       </div>
 
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"0 1rem 6rem" }}>
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"0 clamp(0.55rem, 3vw, 1rem) 6rem" }}>
         {filtered.length===0 ? (
           <div style={{ textAlign:"center", padding:"6rem 2rem" }}>
             <div style={{ fontFamily:DISPLAY, fontSize:60, color:T.inkLight, opacity:0.2, fontStyle:"italic" }}>✦</div>
@@ -900,7 +916,7 @@ function MonthPage({ month, filtered, entries, names, filter, setFilter, search,
   const dayEntries = (groupByMonthDay(monthEntries)[0] || [month, []])[1];
   return (
     <div style={{ minHeight:"100vh", width:"100%", maxWidth:"100%", overflowX:"hidden", background:T.cloudDancer, fontFamily:SANS, boxSizing:"border-box" }}>
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"1.5rem 1rem 0" }}>
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"1.5rem clamp(0.55rem, 3vw, 1rem) 0" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"1.2rem" }}>
           <div>
             <div style={{ display:"flex", gap:12, marginBottom:8 }}>
@@ -918,7 +934,7 @@ function MonthPage({ month, filtered, entries, names, filter, setFilter, search,
         <FilterSearchControls entries={entries} filtered={monthEntries} names={names} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} showSearch={showSearch} setShowSearch={setShowSearch}/>
       </div>
 
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"0 1rem 6rem" }}>
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"0 clamp(0.55rem, 3vw, 1rem) 6rem" }}>
         {monthEntries.length===0 ? (
           <div style={{ textAlign:"center", padding:"5rem 2rem" }}>
             <div style={{ fontFamily:DISPLAY, fontSize:28, color:T.inkMid, fontStyle:"italic" }}>No entries in this view</div>
@@ -1046,7 +1062,7 @@ async function downloadCard(entry, names) {
 
 // ─── Entry form (add / edit) ─────────────────────────────
 function EntryForm({ initial, names, onSave, onCancel, isEdit }) {
-  const [form, setForm] = useState(initial);
+  const [form, setForm] = useState({...initial, hearts: normalizeMoodValue(initial.hearts)});
   const [previews, setPreviews] = useState(initial.photos || (initial.photo ? [initial.photo] : []));
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef();
@@ -1150,7 +1166,7 @@ function EntryForm({ initial, names, onSave, onCancel, isEdit }) {
           <div style={{ fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", color:T.inkLight, marginBottom:14 }}>— &nbsp; How was it?</div>
           <div style={{ display:"flex", gap:8 }}>
             {MOODS.map((m,i)=>{
-              const active=form.hearts===m.n; const c=COL[form.writer];
+              const active=normalizeMoodValue(form.hearts)===m.n; const c=COL[form.writer];
               return (
                 <button key={m.n} onClick={()=>f({hearts:m.n})}
                   style={{ flex:1, padding:"12px 4px 8px", borderRadius:12,
@@ -1158,8 +1174,8 @@ function EntryForm({ initial, names, onSave, onCancel, isEdit }) {
                     background:active?c.dim:"transparent", cursor:"pointer",
                     display:"flex", flexDirection:"column", alignItems:"center", gap:6, transition:"all 0.18s" }}>
                   <FaceSvg index={i} size={26} color={active?c.text:T.inkLight}/>
-                  <span style={{ fontSize:10, color:active?c.text:T.inkLight, fontFamily:SANS, letterSpacing:"0.03em", textAlign:"center" }}>
-                    {m.label.split(" ")[0]}
+                  <span style={{ fontSize:10, color:active?c.text:T.inkLight, fontFamily:SANS, letterSpacing:"0.03em", textAlign:"center", whiteSpace:"nowrap" }}>
+                    {m.label}
                   </span>
                 </button>
               );
@@ -1333,7 +1349,7 @@ export default function App() {
   async function handleSaveNew(form) {
     if (!form.location&&!form.food&&!form.notes&&!(form.photos?.length)&&!form.photo) return alert("Fill in at least one field.");
     const id=uid();
-    await setDoc(doc(db,"entries",id),{...form,at:Date.now()});
+    await setDoc(doc(db,"entries",id),{...form,hearts:normalizeMoodValue(form.hearts),at:Date.now()});
     const month = form.date ? form.date.slice(0,7) : "~";
     setSelectedMonth(month);
     setPage("month");
@@ -1341,7 +1357,7 @@ export default function App() {
 
   async function handleSaveEdit(form) {
     if (!editEntry) return;
-    await setDoc(doc(db,"entries",editEntry.id),{...form,at:editEntry.at||Date.now()});
+    await setDoc(doc(db,"entries",editEntry.id),{...form,hearts:normalizeMoodValue(form.hearts),at:editEntry.at||Date.now()});
     const month = form.date ? form.date.slice(0,7) : "~";
     setSelectedMonth(month);
     setEditEntry(null);
@@ -1397,7 +1413,7 @@ export default function App() {
   if (page==="edit"&&editEntry) return (
     <EntryForm
       initial={{ writer:editEntry.writer, date:editEntry.date||today(), location:editEntry.location||"",
-        food:editEntry.food||"", notes:editEntry.notes||"", hearts:editEntry.hearts||3,
+        food:editEntry.food||"", notes:editEntry.notes||"", hearts:normalizeMoodValue(editEntry.hearts||3),
         photos:editEntry.photos||(editEntry.photo?[editEntry.photo]:[]), photo:null }}
       names={names} onSave={handleSaveEdit}
       onCancel={()=>{setEditEntry(null);setPage(selectedMonth ? "month" : "archive");}} isEdit={true}/>
