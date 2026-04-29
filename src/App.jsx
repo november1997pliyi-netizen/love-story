@@ -494,8 +494,8 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick, compac
               <img
                 src={photos[0]}
                 onClick={()=>onPhotoClick&&onPhotoClick(photos[0])}
-                style={{ display:"block", width:"100%", height:compact ? 178 : "auto", maxHeight:compact ? 178 : 300,
-                  objectFit:"cover", cursor:"zoom-in" }}
+                style={{ display:"block", width:"100%", height:compact ? 245 : 320,
+                  aspectRatio:"4 / 5", objectFit:"cover", cursor:"zoom-in" }}
               />
 
               <PhotoAuthorBadge e={e} c={c} names={names} compact={compact}/>
@@ -717,56 +717,69 @@ function useIsMobile() {
 // ─── Day group (same day, both people) ───────────────────
 function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoClick }) {
   const isMobile = useIsMobile();
-  const aEntries = entries.filter(e=>e.writer==="a");
-  const bEntries = entries.filter(e=>e.writer==="b");
-  const bothWrote = aEntries.length > 0 && bEntries.length > 0;
   const compact = isMobile;
+  const sortedEntries = sortEntriesByTimeAsc(entries);
+  const cardBasis = compact ? "76vw" : "270px";
+  const cardMax = compact ? "292px" : "286px";
 
   return (
-    <div style={{ marginBottom:compact ? 18 : 24, width:"100%", maxWidth:"100%", minWidth:0, boxSizing:"border-box", overflowX:"hidden" }}>
-      {/* Day header */}
-      <div style={{ display:"flex", alignItems:"center", gap:compact ? 7 : 10, marginBottom:compact ? 9 : 12, width:"100%" }}>
-        <div style={{ height:1, flex:1, background:T.border }}/>
-        <span style={{ fontSize:compact ? 11 : 12, color:T.inkMid, fontFamily:SANS, letterSpacing:"0.08em",
-          background:T.cloudDancer, padding:compact ? "3px 10px" : "3px 12px", border:`1.5px solid ${T.border}`,
-          borderRadius:20, whiteSpace:"nowrap" }}>
-          {dayLabel(date)}
-        </span>
-        <div style={{ height:1, flex:1, background:T.border }}/>
+    <div style={{ display:"grid", gridTemplateColumns:compact ? "28px minmax(0,1fr)" : "34px minmax(0,1fr)", gap:compact ? 8 : 12,
+      marginBottom:compact ? 22 : 30, width:"100%", maxWidth:"100%", minWidth:0, boxSizing:"border-box" }}>
+      <div style={{ position:"relative", display:"flex", justifyContent:"center" }}>
+        <div style={{ position:"absolute", top:compact ? 25 : 29, bottom:-18, width:1, background:`linear-gradient(to bottom, ${T.border}, transparent)` }}/>
+        <div style={{ width:compact ? 12 : 14, height:compact ? 12 : 14, borderRadius:"50%", marginTop:compact ? 24 : 28,
+          background:T.cloudDancer, border:`1.5px solid ${T.caramel}`, boxShadow:`0 0 0 5px ${T.surface}` }}/>
       </div>
 
-      {bothWrote ? (
-        <div style={{
-          display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)",
-          gap:compact ? 6 : 10, width:"100%", maxWidth:"100%", minWidth:0, boxSizing:"border-box"
-        }}>
-          <div style={{ minWidth:0, maxWidth:"100%", overflow:"hidden" }}>
-            {aEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>)}
+      <div style={{ minWidth:0 }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:compact ? 8 : 10 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, minWidth:0 }}>
+            <span style={{ fontSize:compact ? 12 : 13, color:T.inkMid, fontFamily:SANS, letterSpacing:"0.08em",
+              background:T.surface, padding:compact ? "4px 10px" : "5px 12px", border:`1.5px solid ${T.border}`,
+              borderRadius:999, whiteSpace:"nowrap" }}>
+              {dayLabel(date)}
+            </span>
+            <span style={{ fontSize:compact ? 10 : 11, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase" }}>
+              {sortedEntries.length} card{sortedEntries.length!==1?"s":""}
+            </span>
           </div>
-          <div style={{ minWidth:0, maxWidth:"100%", overflow:"hidden" }}>
-            {bEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>)}
-          </div>
+          {sortedEntries.length > 1 && (
+            <span style={{ fontSize:10, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap" }}>
+              swipe →
+            </span>
+          )}
         </div>
-      ) : (
-        <div style={{ width:"100%", maxWidth:"100%", minWidth:0 }}>
-          {entries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>)}
+
+        <div style={{ display:"flex", gap:compact ? 10 : 12, overflowX:"auto", overflowY:"visible",
+          paddingBottom:compact ? 6 : 8, paddingRight:"1rem", scrollSnapType:"x mandatory",
+          WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none" }}>
+          {sortedEntries.map(e=>(
+            <div key={e.id} style={{ flex:`0 0 ${cardBasis}`, maxWidth:cardMax, minWidth:0, scrollSnapAlign:"start" }}>
+              <EntryCard e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>
+            </div>
+          ))}
+          <div style={{ flex:"0 0 2px" }}/>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 // ─── Stats strip ─────────────────────────────────────────
-function StatsStrip({ entries, names, loveStartDate }) {
+function StatsStrip({ entries, names, loveStartDate, onWriterFilter, activeFilter = "all" }) {
   const cA = entries.filter(e=>e.writer==="a").length;
   const cB = entries.filter(e=>e.writer==="b").length;
-  const avg = entries.length ? entries.reduce((s,e)=>s+e.hearts,0)/entries.length : 0;
+  const avg = entries.length ? entries.reduce((s,e)=>s+normalizeMoodValue(e.hearts),0)/entries.length : 0;
   const topMood = moodOf(Math.round(avg));
   const days = calcDays(loveStartDate);
 
+  const writerStats = [
+    { key:"a", val:cA, label:names.a, col:T.rose },
+    { key:"b", val:cB, label:names.b, col:T.teal },
+  ];
+
   return (
     <div style={{ marginBottom:"1.2rem" }}>
-      {/* Love counter banner */}
       {days !== null && (
         <div style={{ background:`linear-gradient(135deg, ${T.roseDim}, ${T.tealDim})`,
           border:`1.5px solid ${T.border}`, borderRadius:14, padding:"12px 18px",
@@ -779,33 +792,35 @@ function StatsStrip({ entries, names, loveStartDate }) {
               fall in love
             </div>
           </div>
-          <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24"
-            style={{ color:T.rose, opacity:0.82, flexShrink:0, marginRight:4 }}>
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"
+            style={{ color:T.rose, opacity:0.86, flexShrink:0, marginRight:4 }}>
             <path d="M12 21.1C8.2 17.75 3.1 14.2 3.1 9.6C3.1 6.9 5.15 5 7.65 5C9.35 5 10.75 5.86 12 7.48C13.25 5.86 14.65 5 16.35 5C18.85 5 20.9 6.9 20.9 9.6C20.9 14.2 15.8 17.75 12 21.1Z"
               fill="currentColor" />
           </svg>
         </div>
       )}
 
-      {/* Stats row */}
       <div style={{ display:"flex", background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:14, overflow:"hidden" }}>
-        {[{val:cA,label:names.a,col:T.rose},{val:cB,label:names.b,col:T.teal}].map((s,i)=>(
-          <div key={i} style={{ flex:1, padding:"12px 14px", borderRight:`1.5px solid ${T.border}` }}>
+        {writerStats.map((s)=>(
+          <button key={s.key} onClick={()=>onWriterFilter && onWriterFilter(activeFilter===s.key ? "all" : s.key)}
+            style={{ flex:1, padding:"12px 14px", border:"none", borderRight:`1.5px solid ${T.border}`,
+              background:activeFilter===s.key ? s.col+"18" : "transparent", textAlign:"left", cursor:"pointer", minWidth:0 }}>
             <div style={{ fontSize:22, fontFamily:DISPLAY, fontWeight:600, color:s.col, lineHeight:1 }}>{s.val}</div>
             <div style={{ fontSize:11, color:T.inkLight, marginTop:4, letterSpacing:"0.08em", textTransform:"uppercase", display:"flex", alignItems:"center", gap:5 }}>
               <span style={{ width:6, height:6, borderRadius:"50%", background:s.col, display:"inline-block" }}/>
-              {s.label}
+              <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{s.label}</span>
             </div>
-          </div>
+          </button>
         ))}
-        <div style={{ flex:1.4, padding:"12px 14px" }}>
+        <button onClick={()=>onWriterFilter && onWriterFilter("all")}
+          style={{ flex:1.4, padding:"12px 14px", border:"none", background:activeFilter==="all" ? "rgba(196,122,72,0.08)" : "transparent", textAlign:"left", cursor:"pointer" }}>
           {entries.length
             ? <FaceSvg index={topMood.n-1} size={24} color={T.caramel}/>
             : <span style={{ fontSize:18, color:T.inkLight }}>—</span>}
           <div style={{ fontSize:11, color:T.inkLight, marginTop:4, letterSpacing:"0.08em", textTransform:"uppercase" }}>
             {entries.length ? topMood.label : "no entries"}
           </div>
-        </div>
+        </button>
       </div>
     </div>
   );
@@ -838,6 +853,43 @@ function flattenDayEntries(dayEntries) {
 function getCover(entries) {
   const withPhoto = entries.find(e=>getPhotos(e).length > 0);
   return withPhoto ? getPhotos(withPhoto)[0] : null;
+}
+
+
+function dateSearchTokens(date) {
+  if (!date) return [];
+  const dt = new Date(date + "T12:00:00");
+  if (Number.isNaN(dt.getTime())) return [String(date).toLowerCase()];
+  const y = dt.getFullYear();
+  const m = dt.getMonth() + 1;
+  const d = dt.getDate();
+  const mm = String(m).padStart(2,"0");
+  const dd = String(d).padStart(2,"0");
+  const shortMonth = dt.toLocaleDateString("en-US", { month:"short" }).toLowerCase();
+  const longMonth = dt.toLocaleDateString("en-US", { month:"long" }).toLowerCase();
+  return [
+    date,
+    `${m}.${d}`, `${mm}.${dd}`, `${m}/${d}`, `${mm}/${dd}`,
+    `${m}-${d}`, `${mm}-${dd}`,
+    `${shortMonth} ${d}`, `${longMonth} ${d}`,
+    `${shortMonth} ${d} ${y}`, `${longMonth} ${d} ${y}`,
+    `${d} ${shortMonth}`, `${d} ${longMonth}`,
+  ].map(v=>String(v).toLowerCase());
+}
+
+function entryMatchesSearch(entry, search) {
+  const q = (search || "").trim().toLowerCase();
+  if (!q) return true;
+  const text = [
+    entry.location, entry.food, entry.notes,
+    entry.date, fmtDate(entry.date), dayLabel(entry.date),
+    ...dateSearchTokens(entry.date)
+  ].filter(Boolean).join(" ").toLowerCase();
+  return text.includes(q);
+}
+
+function sortEntriesByTimeAsc(entries) {
+  return [...entries].sort((a,b)=>(a.at||0)-(b.at||0));
 }
 
 function HomePage({ entries, names, loveStartDate, onOpenArchive, onAdd, onSetup }) {
@@ -905,14 +957,29 @@ function HomePage({ entries, names, loveStartDate, onOpenArchive, onAdd, onSetup
   );
 }
 
-function FilterSearchControls({ entries, filtered, names, filter, setFilter, search, setSearch, showSearch, setShowSearch }) {
+function FilterSearchControls({ filtered, names, filter, setFilter, search, setSearch, showSearch, setShowSearch, selectedDate, setSelectedDate }) {
+  const [showDate, setShowDate] = useState(Boolean(selectedDate));
   return (
     <>
       {showSearch && (
         <div style={{ marginBottom:"1rem" }}>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search entries..." autoFocus
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search date, place, food, notes… e.g. 4.29" autoFocus
             style={{...fieldBase, fontSize:14, borderColor:search?T.caramel:T.border}}/>
           {search && <div style={{ fontSize:12, color:T.inkLight, marginTop:6 }}>{filtered.length} result{filtered.length!==1?"s":""}</div>}
+        </div>
+      )}
+
+      {showDate && (
+        <div style={{ marginBottom:"0.9rem", display:"flex", gap:8, alignItems:"center" }}>
+          <input type="date" value={selectedDate || ""} onChange={e=>setSelectedDate(e.target.value)}
+            style={{...fieldBase, flex:1, fontSize:14, borderColor:selectedDate?T.caramel:T.border, minWidth:0}}/>
+          {selectedDate && (
+            <button onClick={()=>setSelectedDate("")}
+              style={{ border:`1.5px solid ${T.border}`, background:"transparent", color:T.inkLight, borderRadius:12,
+                padding:"10px 12px", fontFamily:SANS, cursor:"pointer" }}>
+              clear
+            </button>
+          )}
         </div>
       )}
 
@@ -926,6 +993,12 @@ function FilterSearchControls({ entries, filtered, names, filter, setFilter, sea
             {label}
           </button>
         ))}
+        <button onClick={()=>setShowDate(s=>!s)}
+          style={{ padding:"6px 12px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
+            border:`1.5px solid ${selectedDate||showDate?T.caramel:T.border}`, background:selectedDate||showDate?"rgba(196,122,72,0.08)":"transparent",
+            color:selectedDate||showDate?T.caramel:T.inkLight, letterSpacing:"0.06em" }}>
+          calendar
+        </button>
         <button onClick={()=>setShowSearch(s=>!s)}
           style={{ marginLeft:"auto", padding:"6px 12px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
             border:`1.5px solid ${showSearch?T.caramel:T.border}`, background:showSearch?"rgba(196,122,72,0.08)":"transparent",
@@ -940,7 +1013,7 @@ function FilterSearchControls({ entries, filtered, names, filter, setFilter, sea
 function MonthCard({ month, dayEntries, onClick }) {
   const all = flattenDayEntries(dayEntries);
   const cover = getCover(all);
-  const avg = all.length ? Math.round(all.reduce((s,e)=>s+e.hearts,0)/all.length) : 3;
+  const avg = all.length ? Math.round(all.reduce((s,e)=>s+normalizeMoodValue(e.hearts),0)/all.length) : 3;
   const mood = moodOf(avg);
   const days = dayEntries.length;
   function handleOpen(ev) {
@@ -952,22 +1025,22 @@ function MonthCard({ month, dayEntries, onClick }) {
     <div role="button" tabIndex={0} onClick={handleOpen}
       onKeyDown={(ev)=>{ if (ev.key === "Enter" || ev.key === " ") handleOpen(ev); }}
       style={{
-        width:"100%", textAlign:"left", padding:0, borderRadius:20, overflow:"hidden",
+        width:"100%", textAlign:"left", padding:0, borderRadius:22, overflow:"hidden",
         background:T.surface, borderWidth:1.5, borderStyle:"solid", borderColor:T.border,
         boxShadow:"0 8px 24px rgba(60,48,36,0.08)", cursor:"pointer",
         touchAction:"manipulation", WebkitTapHighlightColor:"transparent", boxSizing:"border-box"
       }}>
       {cover ? (
-        <div style={{ position:"relative", height:150, overflow:"hidden" }}>
+        <div style={{ position:"relative", height:"min(72vw, 410px)", minHeight:250, overflow:"hidden" }}>
           <img src={cover} style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
-          <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, rgba(28,24,20,0.08), rgba(28,24,20,0.60))" }}/>
-          <div style={{ position:"absolute", right:12, top:12 }}>
+          <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, rgba(28,24,20,0.04) 0%, rgba(28,24,20,0.10) 42%, rgba(28,24,20,0.70) 100%)" }}/>
+          <div style={{ position:"absolute", right:14, top:14 }}>
             <MoodBadge mood={mood} color="white" glass={true}/>
           </div>
-          <div style={{ position:"absolute", left:14, bottom:12, color:"white" }}>
-            <div style={{ fontFamily:DISPLAY, fontSize:30, fontStyle:"italic", lineHeight:1 }}>{monthLabel(month)}</div>
-            <div style={{ fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", opacity:0.82, marginTop:3 }}>
-              {all.length} entries · {countPhotos(all)} photos
+          <div style={{ position:"absolute", left:18, right:18, bottom:18, color:"white" }}>
+            <div style={{ fontFamily:DISPLAY, fontSize:42, fontStyle:"italic", lineHeight:1, textShadow:"0 2px 12px rgba(0,0,0,0.40)" }}>{monthLabel(month)}</div>
+            <div style={{ fontSize:12, letterSpacing:"0.14em", textTransform:"uppercase", opacity:0.86, marginTop:8 }}>
+              {all.length} entries · {countPhotos(all)} photos · {days} day{days!==1?"s":""}
             </div>
           </div>
         </div>
@@ -984,15 +1057,15 @@ function MonthCard({ month, dayEntries, onClick }) {
           </div>
         </div>
       )}
-      <div style={{ padding:"12px 16px", borderTop:`1px solid ${T.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <span style={{ fontSize:12, color:T.inkMid, fontFamily:SANS }}>Open this month</span>
-        <span style={{ color:T.inkLight }}>→</span>
+      <div style={{ padding:"13px 18px", borderTop:`1px solid ${T.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <span style={{ fontSize:13, color:T.inkMid, fontFamily:SANS }}>Open this month</span>
+        <span style={{ color:T.inkLight, fontSize:20 }}>→</span>
       </div>
     </div>
   );
 }
 
-function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilter, search, setSearch, showSearch, setShowSearch, onSetup, onAdd, onOpenMonth }) {
+function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilter, search, setSearch, showSearch, setShowSearch, selectedDate, setSelectedDate, onSetup, onAdd, onOpenMonth }) {
   const monthDayGroups = groupByMonthDay(filtered);
   return (
     <div style={{ minHeight:"100vh", width:"100%", maxWidth:"100%", overflowX:"hidden", background:T.cloudDancer, fontFamily:SANS, boxSizing:"border-box" }}>
@@ -1014,8 +1087,8 @@ function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilte
           </div>
         </div>
 
-        {entries.length>0&&!search && <StatsStrip entries={entries} names={names} loveStartDate={loveStartDate}/>}
-        <FilterSearchControls entries={entries} filtered={filtered} names={names} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} showSearch={showSearch} setShowSearch={setShowSearch}/>
+        {entries.length>0&&!search && <StatsStrip entries={entries} names={names} loveStartDate={loveStartDate} activeFilter={filter} onWriterFilter={setFilter}/>}
+        <FilterSearchControls filtered={filtered} names={names} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} showSearch={showSearch} setShowSearch={setShowSearch} selectedDate={selectedDate} setSelectedDate={setSelectedDate}/>
       </div>
 
       <div style={{ maxWidth:680, margin:"0 auto", padding:"0 clamp(0.55rem, 3vw, 1rem) 6rem" }}>
@@ -1023,10 +1096,10 @@ function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilte
           <div style={{ textAlign:"center", padding:"6rem 2rem" }}>
             <div style={{ fontFamily:DISPLAY, fontSize:60, color:T.inkLight, opacity:0.2, fontStyle:"italic" }}>✦</div>
             <div style={{ fontFamily:DISPLAY, fontSize:28, color:T.inkMid, marginTop:16, fontStyle:"italic" }}>
-              {search?`Nothing found for "${search}"`:"Your story starts here"}
+              {selectedDate?`No cards on ${fmtDate(selectedDate)}`:(search?`Nothing found for "${search}"`:"Your story starts here")}
             </div>
             <div style={{ fontSize:13, color:T.inkLight, marginTop:8, letterSpacing:"0.06em" }}>
-              {search?"Try different keywords":"Tap + to write the first chapter"}
+              {selectedDate?"Pick another date or clear the calendar filter":(search?"Try a date like 4.29, Apr 29, or a keyword":"Tap + to write the first chapter")}
             </div>
           </div>
         ) : (
@@ -1049,7 +1122,7 @@ function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilte
   );
 }
 
-function MonthPage({ month, filtered, entries, names, filter, setFilter, search, setSearch, showSearch, setShowSearch, onBack, onAdd, onEdit, onRemove, onPreview, onPhotoClick }) {
+function MonthPage({ month, filtered, entries, names, filter, setFilter, search, setSearch, showSearch, setShowSearch, selectedDate, setSelectedDate, onBack, onAdd, onEdit, onRemove, onPreview, onPhotoClick }) {
   const monthEntries = filtered.filter(e=>(e.date ? e.date.slice(0,7) : "~") === month);
   const dayEntries = (groupByMonthDay(monthEntries)[0] || [month, []])[1];
   return (
@@ -1060,16 +1133,16 @@ function MonthPage({ month, filtered, entries, names, filter, setFilter, search,
             <div style={{ display:"flex", gap:12, marginBottom:8 }}>
               <button onClick={onBack} style={{ background:"none", border:"none", padding:0, color:T.inkLight, fontSize:12, cursor:"pointer" }}>← all collections</button>
             </div>
-            <div style={{ fontFamily:DISPLAY, fontSize:42, color:T.ink, fontStyle:"italic", fontWeight:500, lineHeight:1 }}>{monthLabel(month)}</div>
+            <div style={{ fontFamily:DISPLAY, fontSize:42, color:T.ink, fontStyle:"italic", fontWeight:500, lineHeight:1 }}>{selectedDate ? fmtDate(selectedDate) : monthLabel(month)}</div>
             <div style={{ fontSize:12, color:T.inkLight, letterSpacing:"0.13em", textTransform:"uppercase", marginTop:5 }}>
-              {monthEntries.length} entries in this collection
+              {monthEntries.length} entries {selectedDate ? "on this day" : "in this collection"}
             </div>
           </div>
           <IconBtn active={showSearch} onClick={()=>setShowSearch(s=>!s)}>
             <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
           </IconBtn>
         </div>
-        <FilterSearchControls entries={entries} filtered={monthEntries} names={names} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} showSearch={showSearch} setShowSearch={setShowSearch}/>
+        <FilterSearchControls filtered={monthEntries} names={names} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} showSearch={showSearch} setShowSearch={setShowSearch} selectedDate={selectedDate} setSelectedDate={setSelectedDate}/>
       </div>
 
       <div style={{ maxWidth:680, margin:"0 auto", padding:"0 clamp(0.55rem, 3vw, 1rem) 6rem" }}>
@@ -1451,6 +1524,7 @@ export default function App() {
   const [filter, setFilter]               = useState("all");
   const [search, setSearch]               = useState("");
   const [showSearch, setShowSearch]       = useState(false);
+  const [selectedDate, setSelectedDateRaw] = useState("");
   const [loaded, setLoaded]               = useState(false);
   const [lightboxSrc, setLightboxSrc]     = useState(null);
   const [previewEntry, setPreviewEntry]   = useState(null);
@@ -1544,9 +1618,20 @@ export default function App() {
     if (typeof window !== "undefined") window.requestAnimationFrame(()=>window.scrollTo({ top:0, behavior:"smooth" }));
   }
 
+  function setSelectedDate(value) {
+    const next = value || "";
+    setSelectedDateRaw(next);
+    if (next) {
+      setSelectedMonth(next.slice(0,7));
+      setPage("month");
+      if (typeof window !== "undefined") window.requestAnimationFrame(()=>window.scrollTo({ top:0, behavior:"smooth" }));
+    }
+  }
+
   const filtered = entries
     .filter(e=>filter==="all"||e.writer===filter)
-    .filter(e=>!search.trim()||[e.location,e.food,e.notes].some(f=>f?.toLowerCase().includes(search.toLowerCase())));
+    .filter(e=>!selectedDate||e.date===selectedDate)
+    .filter(e=>entryMatchesSearch(e, search));
 
   // Render
   if (lightboxSrc) return <Lightbox src={lightboxSrc} onClose={()=>setLightboxSrc(null)}/>;
@@ -1590,6 +1675,7 @@ export default function App() {
         entries={entries} filtered={filtered} names={names} loveStartDate={loveStartDate}
         filter={filter} setFilter={setFilter} search={search} setSearch={setSearch}
         showSearch={showSearch} setShowSearch={setShowSearch}
+        selectedDate={selectedDate} setSelectedDate={setSelectedDate}
         onSetup={()=>setPage("setup")} onAdd={()=>setPage("add")} onOpenMonth={openMonth}
       />
     </>
@@ -1602,6 +1688,7 @@ export default function App() {
         month={selectedMonth} filtered={filtered} entries={entries} names={names}
         filter={filter} setFilter={setFilter} search={search} setSearch={setSearch}
         showSearch={showSearch} setShowSearch={setShowSearch}
+        selectedDate={selectedDate} setSelectedDate={setSelectedDate}
         onBack={goArchive} onAdd={()=>setPage("add")}
         onEdit={startEdit} onRemove={handleRemove}
         onPreview={setPreviewEntry} onPhotoClick={setLightboxSrc}
@@ -1616,6 +1703,7 @@ export default function App() {
         entries={entries} filtered={filtered} names={names} loveStartDate={loveStartDate}
         filter={filter} setFilter={setFilter} search={search} setSearch={setSearch}
         showSearch={showSearch} setShowSearch={setShowSearch}
+        selectedDate={selectedDate} setSelectedDate={setSelectedDate}
         onSetup={()=>setPage("setup")} onAdd={()=>setPage("add")} onOpenMonth={openMonth}
       />
     </>
