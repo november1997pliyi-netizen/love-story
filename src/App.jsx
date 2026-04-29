@@ -79,7 +79,28 @@ function applyTheme(themeId = "warm") {
   Object.assign(T, theme.values);
   Object.assign(COL.a, { text: T.rose, dim: T.roseDim, border: T.roseBorder });
   Object.assign(COL.b, { text: T.teal, dim: T.tealDim, border: T.tealBorder });
-  if (typeof document !== "undefined") document.body.style.background = T.cloudDancer;
+
+  if (typeof document !== "undefined") {
+    const root = document.getElementById("root");
+    document.documentElement.style.background = T.cloudDancer;
+    document.body.style.background = T.cloudDancer;
+    document.documentElement.style.width = "100%";
+    document.body.style.width = "100%";
+    document.documentElement.style.maxWidth = "100%";
+    document.body.style.maxWidth = "100%";
+    document.documentElement.style.overflowX = "hidden";
+    document.body.style.overflowX = "hidden";
+    document.body.style.margin = "0";
+    document.documentElement.style.overscrollBehaviorX = "none";
+    document.body.style.overscrollBehaviorX = "none";
+    if (root) {
+      root.style.background = T.cloudDancer;
+      root.style.width = "100%";
+      root.style.maxWidth = "100%";
+      root.style.overflowX = "hidden";
+      root.style.minHeight = "100vh";
+    }
+  }
 }
 const DISPLAY = "'Cormorant Garamond', serif";
 const SANS    = "'DM Sans', sans-serif";
@@ -284,7 +305,7 @@ function PhotoStrip({ photos, onPhotoClick, compact=false }) {
 // ─── Reaction bar ────────────────────────────────────────
 const REACTION_LIST = [
   { key:"heart", emoji:"❤️"  },
-  { key:"haha",  emoji:"😂"  },
+  { key:"haha",  emoji:"😄"  },
   { key:"cheer", emoji:"💪"  },
   { key:"hug",   emoji:"🤗"  },
 ];
@@ -541,7 +562,14 @@ function StatsStrip({ entries, names, loveStartDate }) {
               fall in love
             </div>
           </div>
-          <div style={{ fontSize:32 }}>🌸</div>
+          <div aria-hidden="true" style={{ width:42, height:42, borderRadius:"50%", border:`1.5px solid ${T.border}`,
+            display:"flex", alignItems:"center", justifyContent:"center", color:T.caramel,
+            background:"rgba(255,255,255,0.20)" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6.5 12c1.8-3.1 4-4.7 5.5-4.7s3.7 1.6 5.5 4.7c-1.8 3.1-4 4.7-5.5 4.7S8.3 15.1 6.5 12Z" />
+              <path d="M8.4 12c1.2-1.7 2.4-2.6 3.6-2.6s2.4.9 3.6 2.6c-1.2 1.7-2.4 2.6-3.6 2.6s-2.4-.9-3.6-2.6Z" />
+            </svg>
+          </div>
         </div>
       )}
 
@@ -743,15 +771,14 @@ function MonthCard({ month, dayEntries, onClick }) {
   );
 }
 
-function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilter, search, setSearch, showSearch, setShowSearch, onHome, onSetup, onAdd, onOpenMonth }) {
+function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilter, search, setSearch, showSearch, setShowSearch, onSetup, onAdd, onOpenMonth }) {
   const monthDayGroups = groupByMonthDay(filtered);
   return (
-    <div style={{ minHeight:"100vh", background:T.cloudDancer, fontFamily:SANS }}>
+    <div style={{ minHeight:"100vh", width:"100%", maxWidth:"100%", overflowX:"hidden", background:T.cloudDancer, fontFamily:SANS, boxSizing:"border-box" }}>
       <div style={{ maxWidth:680, margin:"0 auto", padding:"1.5rem 1rem 0" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"1.2rem" }}>
           <div>
-            <button onClick={onHome} style={{ background:"none", border:"none", padding:0, color:T.inkLight, fontSize:12, cursor:"pointer", marginBottom:8 }}>← home</button>
-            <div style={{ fontFamily:DISPLAY, fontSize:46, color:T.ink, fontStyle:"italic", fontWeight:500, lineHeight:1 }}>Archive</div>
+            <div style={{ fontFamily:DISPLAY, fontSize:46, color:T.ink, fontStyle:"italic", fontWeight:500, lineHeight:1 }}>Chapters</div>
             <div style={{ fontSize:12, color:T.inkLight, letterSpacing:"0.13em", textTransform:"uppercase", marginTop:5 }}>
               {entries.length>0?`${entries.length} entries · ${names.a} & ${names.b}`:`${names.a} & ${names.b}`}
             </div>
@@ -801,17 +828,16 @@ function ArchivePage({ entries, filtered, names, loveStartDate, filter, setFilte
   );
 }
 
-function MonthPage({ month, filtered, entries, names, filter, setFilter, search, setSearch, showSearch, setShowSearch, onBack, onHome, onAdd, onEdit, onRemove, onPreview, onPhotoClick }) {
+function MonthPage({ month, filtered, entries, names, filter, setFilter, search, setSearch, showSearch, setShowSearch, onBack, onAdd, onEdit, onRemove, onPreview, onPhotoClick }) {
   const monthEntries = filtered.filter(e=>(e.date ? e.date.slice(0,7) : "~") === month);
   const dayEntries = (groupByMonthDay(monthEntries)[0] || [month, []])[1];
   return (
-    <div style={{ minHeight:"100vh", background:T.cloudDancer, fontFamily:SANS }}>
+    <div style={{ minHeight:"100vh", width:"100%", maxWidth:"100%", overflowX:"hidden", background:T.cloudDancer, fontFamily:SANS, boxSizing:"border-box" }}>
       <div style={{ maxWidth:680, margin:"0 auto", padding:"1.5rem 1rem 0" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"1.2rem" }}>
           <div>
             <div style={{ display:"flex", gap:12, marginBottom:8 }}>
-              <button onClick={onBack} style={{ background:"none", border:"none", padding:0, color:T.inkLight, fontSize:12, cursor:"pointer" }}>← archive</button>
-              <button onClick={onHome} style={{ background:"none", border:"none", padding:0, color:T.inkLight, fontSize:12, cursor:"pointer" }}>home</button>
+              <button onClick={onBack} style={{ background:"none", border:"none", padding:0, color:T.inkLight, fontSize:12, cursor:"pointer" }}>← all collections</button>
             </div>
             <div style={{ fontFamily:DISPLAY, fontSize:42, color:T.ink, fontStyle:"italic", fontWeight:500, lineHeight:1 }}>{monthLabel(month)}</div>
             <div style={{ fontSize:12, color:T.inkLight, letterSpacing:"0.13em", textTransform:"uppercase", marginTop:5 }}>
@@ -976,7 +1002,7 @@ function EntryForm({ initial, names, onSave, onCancel, isEdit }) {
   }
 
   return (
-    <div style={{ minHeight:"100vh", background:T.cloudDancer, fontFamily:SANS, padding:"1rem" }}>
+    <div style={{ minHeight:"100vh", width:"100%", maxWidth:"100%", overflowX:"hidden", background:T.cloudDancer, fontFamily:SANS, padding:"1rem", boxSizing:"border-box" }}>
       <div style={{ maxWidth:520, margin:"0 auto", paddingBottom:"3rem" }}>
         <div style={{ display:"flex", alignItems:"center", gap:14, padding:"1rem 0 2rem" }}>
           <button onClick={onCancel}
@@ -1118,7 +1144,7 @@ function SetupPage({ names, loveStartDate, themeId, onSave, onCancel }) {
   const [selectedTheme, setSelectedTheme] = useState(themeId || "warm");
 
   return (
-    <div style={{ minHeight:"100vh", background:T.cloudDancer, display:"flex", alignItems:"center", justifyContent:"center", padding:"2rem", fontFamily:SANS }}>
+    <div style={{ minHeight:"100vh", width:"100%", maxWidth:"100%", overflowX:"hidden", background:T.cloudDancer, display:"flex", alignItems:"center", justifyContent:"center", padding:"2rem", fontFamily:SANS, boxSizing:"border-box" }}>
       <div style={{ background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:22,
         padding:"2.5rem 2rem", maxWidth:430, width:"100%", boxShadow:"0 16px 48px rgba(60,48,36,0.12)" }}>
         <div style={{ fontFamily:DISPLAY, fontSize:32, color:T.ink, fontStyle:"italic", marginBottom:6 }}>Settings</div>
@@ -1137,7 +1163,7 @@ function SetupPage({ names, loveStartDate, themeId, onSave, onCancel }) {
 
         <div style={{ marginBottom:"1.5rem", marginTop:"1.4rem" }}>
           <div style={{ fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", color:T.inkLight, marginBottom:7 }}>
-            🌸 &nbsp; Fall in love since
+            ✦ &nbsp; Fall in love since
           </div>
           <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}
             style={{...fieldBase}}/>
@@ -1198,7 +1224,7 @@ export default function App() {
   const [names, setNames]                 = useState({ a:"A", b:"B" });
   const [loveStartDate, setLoveStartDate] = useState("");
   const [themeId, setThemeId]             = useState("warm");
-  const [page, setPage]                   = useState("home");
+  const [page, setPage]                   = useState("archive");
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [editEntry, setEditEntry]         = useState(null);
   const [filter, setFilter]               = useState("all");
@@ -1266,12 +1292,11 @@ export default function App() {
     setNames(newNames);
     setLoveStartDate(newStartDate);
     setThemeId(newThemeId || "warm");
-    setPage("home");
+    setPage("archive");
   }
 
   function startEdit(e) { setEditEntry(e); setPage("edit"); }
-  function goHome() { setSelectedMonth(null); setPage("home"); }
-  function goArchive() { setPage("archive"); }
+  function goArchive() { setSelectedMonth(null); setPage("archive"); }
   function openMonth(month) { setSelectedMonth(month); setPage("month"); }
 
   const filtered = entries
@@ -1291,14 +1316,14 @@ export default function App() {
   if (page==="setup") return (
     <SetupPage
       names={names} loveStartDate={loveStartDate} themeId={themeId}
-      onSave={handleSaveSettings} onCancel={()=>setPage("home")}
+      onSave={handleSaveSettings} onCancel={()=>setPage("archive")}
     />
   );
 
   if (page==="add") return (
     <EntryForm
       initial={EMPTY_FORM()} names={names} onSave={handleSaveNew}
-      onCancel={()=>setPage(selectedMonth ? "month" : "home")} isEdit={false}
+      onCancel={()=>setPage(selectedMonth ? "month" : "archive")} isEdit={false}
     />
   );
 
@@ -1320,7 +1345,7 @@ export default function App() {
         entries={entries} filtered={filtered} names={names} loveStartDate={loveStartDate}
         filter={filter} setFilter={setFilter} search={search} setSearch={setSearch}
         showSearch={showSearch} setShowSearch={setShowSearch}
-        onHome={goHome} onSetup={()=>setPage("setup")} onAdd={()=>setPage("add")} onOpenMonth={openMonth}
+        onSetup={()=>setPage("setup")} onAdd={()=>setPage("add")} onOpenMonth={openMonth}
       />
     </>
   );
@@ -1332,7 +1357,7 @@ export default function App() {
         month={selectedMonth} filtered={filtered} entries={entries} names={names}
         filter={filter} setFilter={setFilter} search={search} setSearch={setSearch}
         showSearch={showSearch} setShowSearch={setShowSearch}
-        onBack={goArchive} onHome={goHome} onAdd={()=>setPage("add")}
+        onBack={goArchive} onAdd={()=>setPage("add")}
         onEdit={startEdit} onRemove={handleRemove}
         onPreview={setPreviewEntry} onPhotoClick={setLightboxSrc}
       />
@@ -1340,9 +1365,14 @@ export default function App() {
   );
 
   return (
-    <HomePage
-      entries={entries} names={names} loveStartDate={loveStartDate}
-      onOpenArchive={goArchive} onAdd={()=>setPage("add")} onSetup={()=>setPage("setup")}
-    />
+    <>
+      {modal}
+      <ArchivePage
+        entries={entries} filtered={filtered} names={names} loveStartDate={loveStartDate}
+        filter={filter} setFilter={setFilter} search={search} setSearch={setSearch}
+        showSearch={showSearch} setShowSearch={setShowSearch}
+        onSetup={()=>setPage("setup")} onAdd={()=>setPage("add")} onOpenMonth={openMonth}
+      />
+    </>
   );
 }
