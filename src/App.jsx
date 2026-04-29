@@ -583,6 +583,30 @@ function ActionRow({ e, onEdit, onRemove, onPreview, compact = false }) {
   );
 }
 
+// ─── Responsive helper ─────────────────────────────────────
+function useIsMobile() {
+  const getMobile = () => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < 640;
+  };
+
+  const [mobile, setMobile] = useState(getMobile);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleResize = () => setMobile(getMobile());
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, []);
+
+  return mobile;
+}
+
 // ─── Day group (same day, both people) ───────────────────
 function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoClick }) {
   const isMobile = useIsMobile();
