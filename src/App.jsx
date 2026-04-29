@@ -90,6 +90,8 @@ function applyTheme(themeId = "warm") {
     document.body.style.maxWidth = "100%";
     document.documentElement.style.overflowX = "hidden";
     document.body.style.overflowX = "hidden";
+    document.documentElement.style.position = "relative";
+    document.body.style.position = "relative";
     document.body.style.margin = "0";
     document.documentElement.style.overscrollBehaviorX = "none";
     document.body.style.overscrollBehaviorX = "none";
@@ -373,7 +375,7 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick }) {
         borderRadius:18, overflow:"hidden", transition:"all 0.25s",
         transform:hov?"translateY(-2px)":"none",
         boxShadow:hov?"0 8px 28px rgba(60,48,36,0.12)":"0 1px 4px rgba(60,48,36,0.06)",
-        marginBottom:14 }}>
+        marginBottom:14, width:"100%", maxWidth:"100%", boxSizing:"border-box" }}>
 
       {/* Accent line */}
       <div style={{ height:3, background:`linear-gradient(90deg,${c.text}88,transparent)` }}/>
@@ -393,14 +395,16 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick }) {
                   objectFit:"cover", cursor:"zoom-in" }}
               />
 
+              <PhotoInfoOverlay e={e}/>
+
               <div style={{ position:"absolute", top:10, right:10 }}>
                 <MoodBadge mood={mood} color="white" glass={true}/>
               </div>
 
               {photos.length > 1 && (
                 <div style={{
-                  position:"absolute", left:10, bottom:10, background:"rgba(28,24,20,0.52)",
-                  color:"white", border:"1px solid rgba(255,255,255,0.30)", borderRadius:999,
+                  position:"absolute", left:10, top:10, background:"rgba(28,24,20,0.44)",
+                  color:"white", border:"1px solid rgba(255,255,255,0.26)", borderRadius:999,
                   padding:"3px 9px", fontSize:11, fontFamily:SANS, letterSpacing:"0.06em",
                   backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)"
                 }}>
@@ -432,7 +436,7 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick }) {
             border:`1px solid ${T.border}`, borderRadius:14, padding:"10px 14px 12px",
             boxShadow:"0 4px 12px rgba(60,48,36,0.06)" }}>
             <HeaderRow e={e} c={c} names={names} mood={mood} showMood={false}/>
-            <TextBody e={e}/>
+            <TextBody e={e} hideMeta={true}/>
             <ActionRow e={e} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview}/>
           </div>
         </div>
@@ -475,12 +479,58 @@ function HeaderRow({ e, c, names, mood, showMood = true }) {
   );
 }
 
-function TextBody({ e }) {
+function PhotoInfoOverlay({ e }) {
+  if (!e.location && !e.food) return null;
+
   return (
     <>
-      {e.location && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◎</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.location}</span></div>}
-      {e.food     && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◈</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.food}</span></div>}
-      {e.notes    && <div style={{ marginTop:8, paddingTop:8, borderTop:`1px solid ${T.border}`, fontSize:16, color:T.inkMid, fontFamily:DISPLAY, fontStyle:"italic", lineHeight:1.6 }}>"{e.notes}"</div>}
+      <div style={{
+        position:"absolute", inset:0, pointerEvents:"none",
+        background:"linear-gradient(to bottom, rgba(28,24,20,0.06) 0%, rgba(28,24,20,0) 38%, rgba(28,24,20,0.72) 100%)"
+      }}/>
+      <div style={{
+        position:"absolute", left:0, right:0, bottom:0, padding:"38px 12px 12px",
+        color:"white", pointerEvents:"none"
+      }}>
+        <div style={{
+          display:"inline-flex", flexDirection:"column", gap:5, maxWidth:"calc(100% - 8px)",
+          padding:"8px 10px", borderRadius:14,
+          background:"rgba(28,24,20,0.36)", border:"1px solid rgba(255,255,255,0.22)",
+          boxShadow:"0 8px 26px rgba(0,0,0,0.24)",
+          backdropFilter:"blur(10px)", WebkitBackdropFilter:"blur(10px)"
+        }}>
+          {e.location && (
+            <div style={{ display:"flex", gap:7, alignItems:"flex-start" }}>
+              <span style={{ fontSize:12, lineHeight:"18px", opacity:0.82 }}>◎</span>
+              <span style={{
+                fontSize:13, lineHeight:1.35, fontFamily:SANS, color:"white",
+                textShadow:"0 1px 4px rgba(0,0,0,0.42)",
+                overflowWrap:"anywhere"
+              }}>{e.location}</span>
+            </div>
+          )}
+          {e.food && (
+            <div style={{ display:"flex", gap:7, alignItems:"flex-start" }}>
+              <span style={{ fontSize:12, lineHeight:"18px", opacity:0.82 }}>◈</span>
+              <span style={{
+                fontSize:13, lineHeight:1.35, fontFamily:SANS, color:"white",
+                textShadow:"0 1px 4px rgba(0,0,0,0.42)",
+                overflowWrap:"anywhere"
+              }}>{e.food}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function TextBody({ e, hideMeta = false }) {
+  return (
+    <>
+      {!hideMeta && e.location && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◎</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.location}</span></div>}
+      {!hideMeta && e.food     && <div style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ fontSize:12, color:T.inkLight }}>◈</span><span style={{ fontSize:14, color:T.ink, fontFamily:SANS, lineHeight:1.45 }}>{e.food}</span></div>}
+      {e.notes    && <div style={{ marginTop:hideMeta?0:8, paddingTop:hideMeta?0:8, borderTop:hideMeta?"none":`1px solid ${T.border}`, fontSize:16, color:T.inkMid, fontFamily:DISPLAY, fontStyle:"italic", lineHeight:1.6 }}>"{e.notes}"</div>}
     </>
   );
 }
@@ -502,15 +552,33 @@ function ActionRow({ e, onEdit, onRemove, onPreview }) {
   );
 }
 
+function useIsMobile(breakpoint = 720) {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth <= breakpoint : false
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => setIsMobile(window.innerWidth <= breakpoint);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 // ─── Day group (same day, both people) ───────────────────
 function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoClick }) {
+  const isMobile = useIsMobile();
   const aEntries = entries.filter(e=>e.writer==="a");
   const bEntries = entries.filter(e=>e.writer==="b");
+  const bothWrote = aEntries.length > 0 && bEntries.length > 0;
 
   return (
-    <div style={{ marginBottom:24 }}>
+    <div style={{ marginBottom:24, width:"100%", maxWidth:"100%", boxSizing:"border-box", overflowX:"hidden" }}>
       {/* Day header */}
-      <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12, width:"100%" }}>
         <div style={{ height:1, flex:1, background:T.border }}/>
         <span style={{ fontSize:12, color:T.inkMid, fontFamily:SANS, letterSpacing:"0.08em",
           background:T.cloudDancer, padding:"3px 12px", border:`1.5px solid ${T.border}`,
@@ -520,18 +588,17 @@ function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoCl
         <div style={{ height:1, flex:1, background:T.border }}/>
       </div>
 
-      {/* If both wrote: show side-by-side on wide, stacked on narrow */}
-      {aEntries.length > 0 && bEntries.length > 0 ? (
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-          <div>
+      {bothWrote && !isMobile ? (
+        <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)", gap:10, width:"100%" }}>
+          <div style={{ minWidth:0 }}>
             {aEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
           </div>
-          <div>
+          <div style={{ minWidth:0 }}>
             {bEntries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
           </div>
         </div>
       ) : (
-        <div>
+        <div style={{ width:"100%", maxWidth:"100%" }}>
           {entries.map(e=><EntryCard key={e.id} e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick}/>)}
         </div>
       )}
