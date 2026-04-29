@@ -494,7 +494,7 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick, compac
               <img
                 src={photos[0]}
                 onClick={()=>onPhotoClick&&onPhotoClick(photos[0])}
-                style={{ display:"block", width:"100%", height:compact ? 245 : 320,
+                style={{ display:"block", width:"100%", height:compact ? 210 : 320,
                   aspectRatio:"4 / 5", objectFit:"cover", cursor:"zoom-in" }}
               />
 
@@ -719,47 +719,119 @@ function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoCl
   const isMobile = useIsMobile();
   const compact = isMobile;
   const sortedEntries = sortEntriesByTimeAsc(entries);
-  const cardBasis = compact ? "76vw" : "270px";
-  const cardMax = compact ? "292px" : "286px";
+  const aEntries = sortedEntries.filter(e => e.writer === "a");
+  const bEntries = sortedEntries.filter(e => e.writer === "b");
+  const bothWrote = aEntries.length > 0 && bEntries.length > 0;
+
+  function PersonDayLane({ writerKey, personEntries }) {
+    if (!personEntries.length) {
+      return (
+        <div style={{
+          minHeight:compact ? 120 : 160, border:`1.5px dashed ${T.border}`,
+          borderRadius:compact ? 15 : 18, display:"flex", alignItems:"center", justifyContent:"center",
+          color:T.inkLight, fontSize:compact ? 10 : 12, fontFamily:SANS,
+          letterSpacing:"0.08em", textTransform:"uppercase", background:"rgba(255,255,255,0.02)",
+          boxSizing:"border-box", padding:compact ? "10px 6px" : "14px"
+        }}>
+          no card
+        </div>
+      );
+    }
+
+    const c = COL[writerKey];
+    const laneLabel = writerKey === "a" ? names.a : names.b;
+    const scrollable = personEntries.length > 1;
+    return (
+      <div style={{ minWidth:0, width:"100%" }}>
+        {bothWrote && (
+          <div style={{
+            display:"flex", alignItems:"center", justifyContent:"space-between", gap:6,
+            marginBottom:compact ? 6 : 8, minWidth:0
+          }}>
+            <span style={{
+              display:"inline-flex", alignItems:"center", gap:5, minWidth:0,
+              color:c.text, background:c.dim, border:`1px solid ${c.border}`,
+              borderRadius:999, padding:compact ? "3px 7px" : "4px 9px",
+              fontSize:compact ? 9 : 10, fontFamily:SANS, letterSpacing:"0.11em",
+              textTransform:"uppercase", fontWeight:600, maxWidth:"100%",
+              overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"
+            }}>
+              <span style={{ width:5, height:5, borderRadius:"50%", background:c.text, flexShrink:0 }}/>
+              {laneLabel}
+            </span>
+            {scrollable && (
+              <span style={{ fontSize:compact ? 8.5 : 10, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap" }}>
+                swipe
+              </span>
+            )}
+          </div>
+        )}
+
+        <div style={{
+          display:"flex", gap:compact ? 8 : 12, overflowX:scrollable ? "auto" : "visible", overflowY:"visible",
+          paddingBottom:compact ? 4 : 6, scrollSnapType:scrollable ? "x mandatory" : "none",
+          WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none", minWidth:0, width:"100%"
+        }}>
+          {personEntries.map(e => (
+            <div key={e.id} style={{
+              flex:scrollable ? "0 0 100%" : "1 1 100%", width:"100%", minWidth:0,
+              scrollSnapAlign:"start", boxSizing:"border-box"
+            }}>
+              <EntryCard e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display:"grid", gridTemplateColumns:compact ? "28px minmax(0,1fr)" : "34px minmax(0,1fr)", gap:compact ? 8 : 12,
-      marginBottom:compact ? 22 : 30, width:"100%", maxWidth:"100%", minWidth:0, boxSizing:"border-box" }}>
+    <div style={{
+      display:"grid", gridTemplateColumns:compact ? "20px minmax(0,1fr)" : "34px minmax(0,1fr)",
+      gap:compact ? 7 : 12, marginBottom:compact ? 24 : 30, width:"100%", maxWidth:"100%",
+      minWidth:0, boxSizing:"border-box"
+    }}>
       <div style={{ position:"relative", display:"flex", justifyContent:"center" }}>
-        <div style={{ position:"absolute", top:compact ? 25 : 29, bottom:-18, width:1, background:`linear-gradient(to bottom, ${T.border}, transparent)` }}/>
-        <div style={{ width:compact ? 12 : 14, height:compact ? 12 : 14, borderRadius:"50%", marginTop:compact ? 24 : 28,
-          background:T.cloudDancer, border:`1.5px solid ${T.caramel}`, boxShadow:`0 0 0 5px ${T.surface}` }}/>
+        <div style={{ position:"absolute", top:compact ? 24 : 29, bottom:-18, width:1, background:`linear-gradient(to bottom, ${T.border}, transparent)` }}/>
+        <div style={{
+          width:compact ? 10 : 14, height:compact ? 10 : 14, borderRadius:"50%",
+          marginTop:compact ? 23 : 28, background:T.cloudDancer, border:`1.5px solid ${T.caramel}`,
+          boxShadow:`0 0 0 ${compact ? 4 : 5}px ${T.surface}`
+        }}/>
       </div>
 
-      <div style={{ minWidth:0 }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:compact ? 8 : 10 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:8, minWidth:0 }}>
-            <span style={{ fontSize:compact ? 12 : 13, color:T.inkMid, fontFamily:SANS, letterSpacing:"0.08em",
-              background:T.surface, padding:compact ? "4px 10px" : "5px 12px", border:`1.5px solid ${T.border}`,
-              borderRadius:999, whiteSpace:"nowrap" }}>
+      <div style={{ minWidth:0, width:"100%" }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:8, marginBottom:compact ? 8 : 10, minWidth:0 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:compact ? 6 : 8, minWidth:0 }}>
+            <span style={{
+              fontSize:compact ? 11 : 13, color:T.inkMid, fontFamily:SANS, letterSpacing:"0.08em",
+              background:T.surface, padding:compact ? "4px 9px" : "5px 12px", border:`1.5px solid ${T.border}`,
+              borderRadius:999, whiteSpace:"nowrap"
+            }}>
               {dayLabel(date)}
             </span>
-            <span style={{ fontSize:compact ? 10 : 11, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase" }}>
+            <span style={{ fontSize:compact ? 9.5 : 11, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap" }}>
               {sortedEntries.length} card{sortedEntries.length!==1?"s":""}
             </span>
           </div>
-          {sortedEntries.length > 1 && (
-            <span style={{ fontSize:10, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap" }}>
+          {sortedEntries.length > 2 && (
+            <span style={{ fontSize:compact ? 8.5 : 10, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap" }}>
               swipe →
             </span>
           )}
         </div>
 
-        <div style={{ display:"flex", gap:compact ? 10 : 12, overflowX:"auto", overflowY:"visible",
-          paddingBottom:compact ? 6 : 8, paddingRight:"1rem", scrollSnapType:"x mandatory",
-          WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none" }}>
-          {sortedEntries.map(e=>(
-            <div key={e.id} style={{ flex:`0 0 ${cardBasis}`, maxWidth:cardMax, minWidth:0, scrollSnapAlign:"start" }}>
-              <EntryCard e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>
-            </div>
-          ))}
-          <div style={{ flex:"0 0 2px" }}/>
-        </div>
+        {bothWrote ? (
+          <div style={{
+            display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)", gap:compact ? 8 : 12,
+            alignItems:"start", width:"100%", minWidth:0, maxWidth:"100%", boxSizing:"border-box"
+          }}>
+            <PersonDayLane writerKey="a" personEntries={aEntries}/>
+            <PersonDayLane writerKey="b" personEntries={bEntries}/>
+          </div>
+        ) : (
+          <PersonDayLane writerKey={aEntries.length ? "a" : "b"} personEntries={sortedEntries}/>
+        )}
       </div>
     </div>
   );
@@ -958,7 +1030,19 @@ function HomePage({ entries, names, loveStartDate, onOpenArchive, onAdd, onSetup
 }
 
 function FilterSearchControls({ filtered, names, filter, setFilter, search, setSearch, showSearch, setShowSearch, selectedDate, setSelectedDate }) {
-  const [showDate, setShowDate] = useState(Boolean(selectedDate));
+  const dateInputRef = useRef(null);
+
+  const openDatePicker = () => {
+    const input = dateInputRef.current;
+    if (!input) return;
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+    } else {
+      input.focus();
+      input.click();
+    }
+  };
+
   return (
     <>
       {showSearch && (
@@ -969,21 +1053,29 @@ function FilterSearchControls({ filtered, names, filter, setFilter, search, setS
         </div>
       )}
 
-      {showDate && (
-        <div style={{ marginBottom:"0.9rem", display:"flex", gap:8, alignItems:"center" }}>
-          <input type="date" value={selectedDate || ""} onChange={e=>setSelectedDate(e.target.value)}
-            style={{...fieldBase, flex:1, fontSize:14, borderColor:selectedDate?T.caramel:T.border, minWidth:0}}/>
-          {selectedDate && (
-            <button onClick={()=>setSelectedDate("")}
-              style={{ border:`1.5px solid ${T.border}`, background:"transparent", color:T.inkLight, borderRadius:12,
-                padding:"10px 12px", fontFamily:SANS, cursor:"pointer" }}>
-              clear
-            </button>
-          )}
+      {selectedDate && (
+        <div style={{
+          marginBottom:"0.9rem", display:"flex", alignItems:"center", justifyContent:"space-between", gap:8,
+          background:T.surface, border:`1.5px solid ${T.caramel}`, borderRadius:15,
+          padding:"8px 10px", boxSizing:"border-box"
+        }}>
+          <div style={{ minWidth:0 }}>
+            <div style={{ fontSize:10, color:T.inkLight, letterSpacing:"0.1em", textTransform:"uppercase", fontFamily:SANS }}>
+              selected date
+            </div>
+            <div style={{ fontSize:14, color:T.ink, fontFamily:SANS, marginTop:2 }}>
+              {fmtDate(selectedDate)}
+            </div>
+          </div>
+          <button onClick={()=>setSelectedDate("")}
+            style={{ border:`1.5px solid ${T.border}`, background:"transparent", color:T.inkLight, borderRadius:999,
+              padding:"7px 10px", fontFamily:SANS, fontSize:12, cursor:"pointer", whiteSpace:"nowrap" }}>
+            clear
+          </button>
         </div>
       )}
 
-      <div style={{ display:"flex", gap:6, marginBottom:"1.2rem", flexWrap:"wrap" }}>
+      <div style={{ display:"flex", gap:6, marginBottom:"1.2rem", flexWrap:"wrap", alignItems:"center" }}>
         {[["all","All"],["a",names.a],["b",names.b]].map(([k,label])=>(
           <button key={k} onClick={()=>setFilter(k)}
             style={{ padding:"6px 14px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
@@ -993,12 +1085,24 @@ function FilterSearchControls({ filtered, names, filter, setFilter, search, setS
             {label}
           </button>
         ))}
-        <button onClick={()=>setShowDate(s=>!s)}
-          style={{ padding:"6px 12px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
-            border:`1.5px solid ${selectedDate||showDate?T.caramel:T.border}`, background:selectedDate||showDate?"rgba(196,122,72,0.08)":"transparent",
-            color:selectedDate||showDate?T.caramel:T.inkLight, letterSpacing:"0.06em" }}>
-          calendar
-        </button>
+
+        <label onClick={openDatePicker}
+          style={{ position:"relative", overflow:"hidden", padding:"6px 12px", borderRadius:20, fontSize:12,
+            fontFamily:SANS, cursor:"pointer", border:`1.5px solid ${selectedDate?T.caramel:T.border}`,
+            background:selectedDate?"rgba(196,122,72,0.08)":"transparent", color:selectedDate?T.caramel:T.inkLight,
+            letterSpacing:"0.06em", display:"inline-flex", alignItems:"center", gap:6, userSelect:"none" }}>
+          <span style={{ fontSize:12 }}>⌕</span>
+          <span>{selectedDate ? fmtDateShort(selectedDate) : "calendar"}</span>
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={selectedDate || ""}
+            onChange={e=>setSelectedDate(e.target.value)}
+            aria-label="Pick a date"
+            style={{ position:"absolute", inset:0, opacity:0, width:"100%", height:"100%", cursor:"pointer" }}
+          />
+        </label>
+
         <button onClick={()=>setShowSearch(s=>!s)}
           style={{ marginLeft:"auto", padding:"6px 12px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
             border:`1.5px solid ${showSearch?T.caramel:T.border}`, background:showSearch?"rgba(196,122,72,0.08)":"transparent",
