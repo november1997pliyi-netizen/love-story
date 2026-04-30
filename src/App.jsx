@@ -689,22 +689,66 @@ function TextBody({ e, hideMeta = false, compact = false }) {
 
 
 function ActionRow({ e, onEdit, onRemove, onPreview, compact = false }) {
-  const btnStyle = (col) => ({
-    background:"none", border:"none", fontSize:compact ? 9.5 : 11, color:T.inkLight, cursor:"pointer",
-    padding:0, fontFamily:SANS, letterSpacing:"0.04em", transition:"color 0.15s",
-    whiteSpace:"nowrap"
+  const [menuOpen, setMenuOpen] = useState(false);
+  const btnStyle = {
+    background:"none", border:"none", fontSize:compact ? 9.5 : 11,
+    color:T.inkLight, cursor:"pointer", padding:0, fontFamily:SANS,
+    letterSpacing:"0.04em", transition:"color 0.15s", whiteSpace:"nowrap"
+  };
+  const menuItemStyle = (color) => ({
+    width:"100%", display:"block", textAlign:"left", background:"transparent", border:"none",
+    color, cursor:"pointer", fontFamily:SANS, fontSize:compact ? 10.5 : 12,
+    letterSpacing:"0.06em", padding:compact ? "8px 10px" : "9px 12px",
+    borderRadius:10, whiteSpace:"nowrap"
   });
+
+  function handleEdit() {
+    setMenuOpen(false);
+    onEdit(e);
+  }
+  function handleRemove() {
+    setMenuOpen(false);
+    onRemove(e.id);
+  }
+
   return (
     <div style={{
-      display:"flex", gap:compact ? 8 : 12, marginTop:compact ? 7 : 8, paddingTop:compact ? 7 : 8,
-      borderTop:`1px solid ${T.border}`, minWidth:0, overflow:"hidden", flexWrap:"wrap"
+      position:"relative", display:"flex", justifyContent:"space-between", alignItems:"center",
+      gap:compact ? 8 : 12, marginTop:compact ? 7 : 8, paddingTop:compact ? 7 : 8,
+      borderTop:`1px solid ${T.border}`, minWidth:0
     }}>
-      <button style={btnStyle(T.teal)} onClick={()=>onPreview(e)}
-        onMouseEnter={ev=>ev.target.style.color=T.teal} onMouseLeave={ev=>ev.target.style.color=T.inkLight}>preview ↗</button>
-      <button style={btnStyle(T.caramel)} onClick={()=>onEdit(e)}
-        onMouseEnter={ev=>ev.target.style.color=T.caramel} onMouseLeave={ev=>ev.target.style.color=T.inkLight}>edit</button>
-      <button style={btnStyle(T.rose)} onClick={()=>onRemove(e.id)}
-        onMouseEnter={ev=>ev.target.style.color=T.rose} onMouseLeave={ev=>ev.target.style.color=T.inkLight}>remove</button>
+      <button style={btnStyle} onClick={()=>onPreview(e)}
+        onMouseEnter={ev=>ev.currentTarget.style.color=T.teal}
+        onMouseLeave={ev=>ev.currentTarget.style.color=T.inkLight}>
+        preview ↗
+      </button>
+
+      <button aria-label="more actions" onClick={()=>setMenuOpen(v=>!v)}
+        style={{
+          width:compact ? 24 : 28, height:compact ? 24 : 28, borderRadius:"50%",
+          border:`1.5px solid ${menuOpen ? T.caramel : T.border}`,
+          background:menuOpen ? "rgba(196,122,72,0.10)" : "transparent",
+          color:menuOpen ? T.caramel : T.inkLight, cursor:"pointer",
+          display:"flex", alignItems:"center", justifyContent:"center", padding:0,
+          flexShrink:0
+        }}>
+        <svg width={compact ? 13 : 15} height={compact ? 13 : 15} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/>
+        </svg>
+      </button>
+
+      {menuOpen && (
+        <div style={{
+          position:"absolute", right:0, bottom:"calc(100% + 8px)", zIndex:40,
+          minWidth:compact ? 108 : 126, padding:6, borderRadius:14,
+          background:T.surface, border:`1.5px solid ${T.border}`,
+          boxShadow:"0 14px 36px rgba(28,24,20,0.18)",
+          backdropFilter:"blur(14px)", WebkitBackdropFilter:"blur(14px)"
+        }}>
+          <button onClick={handleEdit} style={menuItemStyle(T.caramel)}>edit</button>
+          <button onClick={handleRemove} style={menuItemStyle(T.rose)}>remove</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1110,24 +1154,34 @@ function FilterSearchControls({ filtered, names, filter, setFilter, search, setS
         </div>
       )}
 
-      <div style={{ display:"flex", gap:6, marginBottom:showCalendar ? "0.75rem" : "1.2rem", flexWrap:"wrap", alignItems:"center" }}>
-        {[["all","All"],["a",names.a],["b",names.b]].map(([k,label])=>(
-          <button key={k} onClick={()=>setFilter(k)}
-            style={{ padding:"6px 14px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
-              border:`1.5px solid ${filter===k?T.caramel:T.border}`,
-              background:filter===k?"rgba(196,122,72,0.08)":"transparent",
-              color:filter===k?T.caramel:T.inkLight, letterSpacing:"0.06em", transition:"all 0.2s" }}>
-            {label}
-          </button>
-        ))}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, marginBottom:showCalendar ? "0.75rem" : "1.2rem" }}>
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center", minWidth:0 }}>
+          {[["all","All"],["a",names.a],["b",names.b]].map(([k,label])=>(
+            <button key={k} onClick={()=>setFilter(k)}
+              style={{ padding:"6px 14px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
+                border:`1.5px solid ${filter===k?T.caramel:T.border}`,
+                background:filter===k?"rgba(196,122,72,0.08)":"transparent",
+                color:filter===k?T.caramel:T.inkLight, letterSpacing:"0.06em", transition:"all 0.2s",
+                maxWidth:118, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+              {label}
+            </button>
+          ))}
+        </div>
 
-        <button onClick={()=>setShowCalendar(v=>!v)}
-          style={{ padding:"6px 13px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
+        <button onClick={()=>setShowCalendar(v=>!v)} aria-label="calendar"
+          style={{
+            width:38, height:38, borderRadius:15, flexShrink:0, cursor:"pointer",
             border:`1.5px solid ${showCalendar||selectedDate?T.caramel:T.border}`,
-            background:showCalendar||selectedDate?"rgba(196,122,72,0.08)":"transparent",
-            color:showCalendar||selectedDate?T.caramel:T.inkLight, letterSpacing:"0.06em", display:"inline-flex", alignItems:"center", gap:6 }}>
-          <span style={{ fontSize:13, lineHeight:1 }}>◷</span>
-          <span>{selectedDate ? fmtDateShort(selectedDate) : "calendar"}</span>
+            background:showCalendar||selectedDate?"rgba(196,122,72,0.10)":"transparent",
+            color:showCalendar||selectedDate?T.caramel:T.inkLight,
+            display:"flex", alignItems:"center", justifyContent:"center",
+            boxShadow:showCalendar ? "0 8px 24px rgba(28,24,20,0.10)" : "none"
+          }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3.5" y="5" width="17" height="15.5" rx="3"/>
+            <path d="M8 3.5v3M16 3.5v3M3.8 9.2h16.4"/>
+            <path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/>
+          </svg>
         </button>
       </div>
 
@@ -1674,31 +1728,88 @@ function SetupPage({ names, loveStartDate, themeId, onSave, onCancel }) {
 function PrivacyGate({ onUnlock }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [shake, setShake] = useState(false);
 
-  function submit(e) {
-    e.preventDefault();
+  useEffect(() => {
+    if (code.length !== 4) return;
     const ok = onUnlock(code);
-    if (!ok) setError("Wrong code");
+    if (!ok) {
+      setError("Wrong code");
+      setShake(true);
+      const t = setTimeout(() => {
+        setCode("");
+        setShake(false);
+      }, 420);
+      return () => clearTimeout(t);
+    }
+  }, [code, onUnlock]);
+
+  function pressKey(key) {
+    setError("");
+    setCode(prev => prev.length >= 4 ? prev : prev + key);
+  }
+  function backspace() {
+    setError("");
+    setCode(prev => prev.slice(0, -1));
   }
 
+  const keyBase = {
+    width:66, height:66, borderRadius:"50%", border:"1px solid rgba(255,255,255,0.24)",
+    background:"rgba(255,255,255,0.14)", color:T.ink, fontFamily:SANS, fontSize:24,
+    cursor:"pointer", boxShadow:"inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 28px rgba(28,24,20,0.10)",
+    backdropFilter:"blur(16px)", WebkitBackdropFilter:"blur(16px)",
+    display:"flex", alignItems:"center", justifyContent:"center", touchAction:"manipulation"
+  };
+
   return (
-    <div style={{ minHeight:"100vh", background:T.cloudDancer, fontFamily:SANS, display:"flex", alignItems:"center", justifyContent:"center", padding:"2rem", boxSizing:"border-box" }}>
-      <form onSubmit={submit} style={{ width:"100%", maxWidth:390, background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:26, padding:"2.2rem", boxShadow:"0 20px 70px rgba(28,24,20,0.16)", boxSizing:"border-box" }}>
-        <div style={{ fontFamily:DISPLAY, fontSize:44, color:T.ink, fontStyle:"italic", lineHeight:1 }}>Chapters</div>
-        <div style={{ marginTop:8, marginBottom:22, color:T.inkLight, fontSize:12, letterSpacing:"0.14em", textTransform:"uppercase" }}>
-          private archive
+    <div style={{
+      minHeight:"100vh", width:"100%", background:`radial-gradient(circle at 20% 12%, ${T.roseDim}, transparent 34%), radial-gradient(circle at 82% 30%, ${T.tealDim}, transparent 36%), ${T.cloudDancer}`,
+      fontFamily:SANS, display:"flex", alignItems:"center", justifyContent:"center",
+      padding:"2rem 1.4rem", boxSizing:"border-box", color:T.ink, overflow:"hidden"
+    }}>
+      <div style={{ width:"100%", maxWidth:390, textAlign:"center" }}>
+        <div style={{
+          background:"rgba(255,255,255,0.12)", border:`1.5px solid ${T.border}`,
+          borderRadius:32, padding:"2.2rem 1.5rem 1.6rem",
+          boxShadow:"0 24px 80px rgba(28,24,20,0.16)",
+          backdropFilter:"blur(22px)", WebkitBackdropFilter:"blur(22px)",
+          transform:shake ? "translateX(4px)" : "translateX(0)", transition:"transform 0.08s"
+        }}>
+          <div style={{ fontFamily:DISPLAY, fontSize:50, color:T.ink, fontStyle:"italic", lineHeight:1 }}>Chapters</div>
+          <div style={{ marginTop:8, color:T.inkLight, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase" }}>
+            private archive
+          </div>
+
+          <div style={{ margin:"2rem 0 0.85rem", display:"flex", justifyContent:"center", gap:13 }}>
+            {[0,1,2,3].map(i=>(
+              <span key={i} style={{
+                width:12, height:12, borderRadius:"50%", display:"inline-block",
+                background:i < code.length ? T.caramel : "transparent",
+                border:`1.5px solid ${i < code.length ? T.caramel : T.border}`,
+                boxShadow:i < code.length ? `0 0 0 4px ${T.roseDim}` : "none",
+                transition:"all 0.18s"
+              }}/>
+            ))}
+          </div>
+          <div style={{ height:20, color:T.rose, fontSize:12, fontFamily:SANS, letterSpacing:"0.04em" }}>
+            {error || "Enter passcode"}
+          </div>
         </div>
-        <div style={{ color:T.inkMid, fontSize:14, lineHeight:1.6, marginBottom:18 }}>
-          This page is locked. Enter the access code to view the private cards.
+
+        <div style={{
+          margin:"1.55rem auto 0", display:"grid", gridTemplateColumns:"repeat(3, 66px)",
+          gap:"14px 18px", justifyContent:"center"
+        }}>
+          {["1","2","3","4","5","6","7","8","9"].map(n=>(
+            <button key={n} onClick={()=>pressKey(n)} style={keyBase}>{n}</button>
+          ))}
+          <div />
+          <button onClick={()=>pressKey("0")} style={keyBase}>0</button>
+          <button onClick={backspace} aria-label="delete" style={{...keyBase, fontSize:21, color:T.inkMid}}>
+            ⌫
+          </button>
         </div>
-        <input value={code} onChange={e=>{ setCode(e.target.value); setError(""); }} type="password" inputMode="numeric" autoFocus
-          placeholder="Access code"
-          style={{ width:"100%", background:T.cloudDancer, border:`1.5px solid ${error?T.rose:T.border}`, borderRadius:13, padding:"13px 14px", fontSize:16, color:T.ink, outline:"none", boxSizing:"border-box", fontFamily:SANS }}/>
-        {error && <div style={{ color:T.rose, fontSize:12, marginTop:8 }}>{error}</div>}
-        <button type="submit" style={{ width:"100%", marginTop:16, padding:"13px", borderRadius:13, border:"none", background:T.ink, color:T.cloudDancer, fontFamily:SANS, fontSize:13, letterSpacing:"0.08em", cursor:"pointer" }}>
-          UNLOCK
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
