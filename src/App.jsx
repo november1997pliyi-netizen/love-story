@@ -107,6 +107,10 @@ function applyTheme(themeId = "warm") {
 const DISPLAY = "'Cormorant Garamond', 'Times New Roman', serif";
 const SANS    = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
+// Simple client-side privacy gate. Change this code before publishing if needed.
+const PRIVATE_ACCESS_CODE = "1314";
+const PRIVACY_STORAGE_KEY = "chapters_privacy_unlocked";
+
 // ─── Moods ───────────────────────────────────────────────
 const MOODS = [
   { n:1, label:"rough"     },
@@ -347,6 +351,7 @@ function normalizeEmojiInput(value) {
 function ReactionBar({ entryId, reactions={}, compact = false }) {
   const [open, setOpen] = useState(false);
   const [customEmoji, setCustomEmoji] = useState("");
+  const isMobile = useIsMobile();
 
   const activeReactions = Object.entries(reactions || {})
     .filter(([, count]) => Number(count) > 0)
@@ -366,6 +371,16 @@ function ReactionBar({ entryId, reactions={}, compact = false }) {
     setCustomEmoji("");
     setOpen(false);
   }
+
+  const pickerStyle = isMobile ? {
+    position:"fixed", left:12, right:12, bottom:16, zIndex:999,
+    width:"auto", maxWidth:"none", background:T.surface, border:`1.5px solid ${T.border}`,
+    borderRadius:22, boxShadow:"0 24px 80px rgba(0,0,0,0.34)", padding:14, boxSizing:"border-box"
+  } : {
+    position:"absolute", zIndex:30, marginTop:8, left:0, width:320, maxWidth:"min(320px, calc(100vw - 32px))",
+    background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:16,
+    boxShadow:"0 18px 48px rgba(28,24,20,0.18)", padding:10, boxSizing:"border-box"
+  };
 
   return (
     <div style={{ position:"relative", marginTop:compact ? 6 : 8 }}>
@@ -397,38 +412,43 @@ function ReactionBar({ entryId, reactions={}, compact = false }) {
       </div>
 
       {open && (
-        <div style={{
-          position:"relative", zIndex:30, marginTop:8, width:compact ? 214 : 250, maxWidth:"100%",
-          background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:16,
-          boxShadow:"0 18px 48px rgba(28,24,20,0.18)", padding:10, boxSizing:"border-box"
-        }}>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(6, 1fr)", gap:6 }}>
-            {EMOJI_PICKER.map(emoji => (
-              <button key={emoji} onClick={()=>toggleEmoji(emoji)}
+        <>
+          {isMobile && <div onClick={()=>setOpen(false)} style={{ position:"fixed", inset:0, zIndex:998, background:"rgba(0,0,0,0.18)" }}/>}
+          <div style={pickerStyle}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+              <div style={{ fontSize:12, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase" }}>Add reaction</div>
+              {isMobile && (
+                <button onClick={()=>setOpen(false)} style={{ border:"none", background:"transparent", color:T.inkLight, fontSize:18, cursor:"pointer", padding:0 }}>×</button>
+              )}
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:isMobile ? "repeat(8, minmax(0,1fr))" : "repeat(8, 1fr)", gap:7 }}>
+              {EMOJI_PICKER.map(emoji => (
+                <button key={emoji} onClick={()=>toggleEmoji(emoji)}
+                  style={{
+                    border:`1px solid ${T.border}`, background:T.cloudDancer, borderRadius:11,
+                    height:isMobile ? 36 : 32, fontSize:isMobile ? 19 : 17, cursor:"pointer",
+                    display:"flex", alignItems:"center", justifyContent:"center", minWidth:0
+                  }}>
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            <div style={{ display:"flex", gap:7, marginTop:10 }}>
+              <input value={customEmoji} onChange={e=>setCustomEmoji(e.target.value)}
+                placeholder="paste emoji from getemoji.com"
                 style={{
-                  border:`1px solid ${T.border}`, background:T.cloudDancer, borderRadius:10,
-                  height:compact ? 28 : 32, fontSize:compact ? 15 : 17, cursor:"pointer",
-                  display:"flex", alignItems:"center", justifyContent:"center"
-                }}>
-                {emoji}
+                  flex:1, minWidth:0, background:T.cloudDancer, border:`1px solid ${T.border}`,
+                  borderRadius:11, padding:"9px 10px", color:T.ink, fontFamily:SANS, fontSize:13,
+                  outline:"none", boxSizing:"border-box"
+                }}/>
+              <button onClick={()=>toggleEmoji(customEmoji)}
+                style={{ border:"none", background:T.ink, color:T.cloudDancer, borderRadius:11,
+                  padding:"0 12px", fontFamily:SANS, fontSize:12, cursor:"pointer" }}>
+                add
               </button>
-            ))}
+            </div>
           </div>
-          <div style={{ display:"flex", gap:6, marginTop:8 }}>
-            <input value={customEmoji} onChange={e=>setCustomEmoji(e.target.value)}
-              placeholder="paste emoji"
-              style={{
-                flex:1, minWidth:0, background:T.cloudDancer, border:`1px solid ${T.border}`,
-                borderRadius:10, padding:"7px 8px", color:T.ink, fontFamily:SANS, fontSize:12,
-                outline:"none", boxSizing:"border-box"
-              }}/>
-            <button onClick={()=>toggleEmoji(customEmoji)}
-              style={{ border:"none", background:T.ink, color:T.cloudDancer, borderRadius:10,
-                padding:"0 10px", fontFamily:SANS, fontSize:12, cursor:"pointer" }}>
-              add
-            </button>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -461,7 +481,7 @@ function MoodBadge({ mood, color = T.ink, glass = false, compact = false }) {
   );
 }
 
-function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick, compact = false }) {
+function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick, compact = false, hidePhotoAuthor = true }) {
   const [hov, setHov] = useState(false);
   const c = COL[e.writer];
   const mood = moodOf(e.hearts);
@@ -498,7 +518,7 @@ function EntryCard({ e, names, onEdit, onRemove, onPreview, onPhotoClick, compac
                   aspectRatio:"4 / 5", objectFit:"cover", cursor:"zoom-in" }}
               />
 
-              <PhotoAuthorBadge e={e} c={c} names={names} compact={compact}/>
+              {!hidePhotoAuthor && <PhotoAuthorBadge e={e} c={c} names={names} compact={compact}/>}
               <PhotoInfoOverlay e={e} compact={compact}/>
 
               <div style={{ position:"absolute", top:compact ? 7 : 10, right:compact ? 7 : 10 }}>
@@ -724,6 +744,20 @@ function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoCl
   const bothWrote = aEntries.length > 0 && bEntries.length > 0;
 
   function PersonDayLane({ writerKey, personEntries }) {
+    const [activeIndex, setActiveIndex] = useState(0);
+    const laneRef = useRef(null);
+    const c = COL[writerKey];
+    const laneLabel = writerKey === "a" ? names.a : names.b;
+    const scrollable = personEntries.length > 1;
+
+    function updateActiveIndex() {
+      const node = laneRef.current;
+      if (!node) return;
+      const cardW = node.clientWidth || 1;
+      const next = Math.round(node.scrollLeft / Math.max(1, cardW * (compact ? 0.90 : 0.82)));
+      setActiveIndex(Math.min(personEntries.length - 1, Math.max(0, next)));
+    }
+
     if (!personEntries.length) {
       return (
         <div style={{
@@ -738,9 +772,6 @@ function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoCl
       );
     }
 
-    const c = COL[writerKey];
-    const laneLabel = writerKey === "a" ? names.a : names.b;
-    const scrollable = personEntries.length > 1;
     return (
       <div style={{ minWidth:0, width:"100%" }}>
         {bothWrote && (
@@ -760,24 +791,32 @@ function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoCl
               {laneLabel}
             </span>
             {scrollable && (
-              <span style={{ fontSize:compact ? 8.5 : 10, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap" }}>
-                swipe
+              <span style={{ fontSize:compact ? 9 : 10, color:T.caramel, fontFamily:SANS, letterSpacing:"0.08em", whiteSpace:"nowrap" }}>
+                {activeIndex + 1}/{personEntries.length}
               </span>
             )}
           </div>
         )}
 
-        <div style={{
+        {!bothWrote && scrollable && (
+          <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:6 }}>
+            <span style={{ fontSize:compact ? 9 : 10, color:T.caramel, fontFamily:SANS, letterSpacing:"0.08em" }}>
+              {activeIndex + 1}/{personEntries.length}
+            </span>
+          </div>
+        )}
+
+        <div ref={laneRef} onScroll={updateActiveIndex} style={{
           display:"flex", gap:compact ? 8 : 12, overflowX:scrollable ? "auto" : "visible", overflowY:"visible",
           paddingBottom:compact ? 4 : 6, scrollSnapType:scrollable ? "x mandatory" : "none",
           WebkitOverflowScrolling:"touch", scrollbarWidth:"none", msOverflowStyle:"none", minWidth:0, width:"100%"
         }}>
           {personEntries.map(e => (
             <div key={e.id} style={{
-              flex:scrollable ? "0 0 100%" : "1 1 100%", width:"100%", minWidth:0,
-              scrollSnapAlign:"start", boxSizing:"border-box"
+              flex:scrollable ? `0 0 ${compact ? "91%" : "84%"}` : "1 1 100%",
+              width:"100%", minWidth:0, scrollSnapAlign:"start", boxSizing:"border-box"
             }}>
-              <EntryCard e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact}/>
+              <EntryCard e={e} names={names} onEdit={onEdit} onRemove={onRemove} onPreview={onPreview} onPhotoClick={onPhotoClick} compact={compact} hidePhotoAuthor={true}/>
             </div>
           ))}
         </div>
@@ -814,11 +853,6 @@ function DayGroup({ date, entries, names, onEdit, onRemove, onPreview, onPhotoCl
               {sortedEntries.length} card{sortedEntries.length!==1?"s":""}
             </span>
           </div>
-          {sortedEntries.length > 2 && (
-            <span style={{ fontSize:compact ? 8.5 : 10, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap" }}>
-              swipe →
-            </span>
-          )}
         </div>
 
         {bothWrote ? (
@@ -1102,13 +1136,6 @@ function FilterSearchControls({ filtered, names, filter, setFilter, search, setS
             style={{ position:"absolute", inset:0, opacity:0, width:"100%", height:"100%", cursor:"pointer" }}
           />
         </label>
-
-        <button onClick={()=>setShowSearch(s=>!s)}
-          style={{ marginLeft:"auto", padding:"6px 12px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
-            border:`1.5px solid ${showSearch?T.caramel:T.border}`, background:showSearch?"rgba(196,122,72,0.08)":"transparent",
-            color:showSearch?T.caramel:T.inkLight, letterSpacing:"0.06em" }}>
-          search
-        </button>
       </div>
     </>
   );
@@ -1614,6 +1641,39 @@ function SetupPage({ names, loveStartDate, themeId, onSave, onCancel }) {
   );
 }
 
+
+function PrivacyGate({ onUnlock }) {
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+
+  function submit(e) {
+    e.preventDefault();
+    const ok = onUnlock(code);
+    if (!ok) setError("Wrong code");
+  }
+
+  return (
+    <div style={{ minHeight:"100vh", background:T.cloudDancer, fontFamily:SANS, display:"flex", alignItems:"center", justifyContent:"center", padding:"2rem", boxSizing:"border-box" }}>
+      <form onSubmit={submit} style={{ width:"100%", maxWidth:390, background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:26, padding:"2.2rem", boxShadow:"0 20px 70px rgba(28,24,20,0.16)", boxSizing:"border-box" }}>
+        <div style={{ fontFamily:DISPLAY, fontSize:44, color:T.ink, fontStyle:"italic", lineHeight:1 }}>Chapters</div>
+        <div style={{ marginTop:8, marginBottom:22, color:T.inkLight, fontSize:12, letterSpacing:"0.14em", textTransform:"uppercase" }}>
+          private archive
+        </div>
+        <div style={{ color:T.inkMid, fontSize:14, lineHeight:1.6, marginBottom:18 }}>
+          This page is locked. Enter the access code to view the private cards.
+        </div>
+        <input value={code} onChange={e=>{ setCode(e.target.value); setError(""); }} type="password" inputMode="numeric" autoFocus
+          placeholder="Access code"
+          style={{ width:"100%", background:T.cloudDancer, border:`1.5px solid ${error?T.rose:T.border}`, borderRadius:13, padding:"13px 14px", fontSize:16, color:T.ink, outline:"none", boxSizing:"border-box", fontFamily:SANS }}/>
+        {error && <div style={{ color:T.rose, fontSize:12, marginTop:8 }}>{error}</div>}
+        <button type="submit" style={{ width:"100%", marginTop:16, padding:"13px", borderRadius:13, border:"none", background:T.ink, color:T.cloudDancer, fontFamily:SANS, fontSize:13, letterSpacing:"0.08em", cursor:"pointer" }}>
+          UNLOCK
+        </button>
+      </form>
+    </div>
+  );
+}
+
 // ─── Main App ─────────────────────────────────────────────
 const EMPTY_FORM = () => ({ writer:"a", date:today(), location:"", food:"", notes:"", hearts:3, photos:[], photo:null });
 
@@ -1632,6 +1692,7 @@ export default function App() {
   const [loaded, setLoaded]               = useState(false);
   const [lightboxSrc, setLightboxSrc]     = useState(null);
   const [previewEntry, setPreviewEntry]   = useState(null);
+  const [unlocked, setUnlocked]           = useState(()=> typeof window !== "undefined" && window.localStorage.getItem(PRIVACY_STORAGE_KEY) === "yes");
 
   useEffect(() => {
     if (!document.getElementById("chapters-fonts")) {
@@ -1669,13 +1730,19 @@ export default function App() {
       }
     });
 
+    if (!unlocked) {
+      setEntries([]);
+      setLoaded(true);
+      return;
+    }
+
     const unsub = onSnapshot(collection(db,"entries"), snap=>{
       const data=snap.docs.map(d=>({id:d.id,...d.data()}));
       data.sort((a,b)=>(b.at||0)-(a.at||0));
       setEntries(data); setLoaded(true);
     });
     return ()=>unsub();
-  }, []);
+  }, [unlocked]);
 
   useEffect(() => {
     applyTheme(themeId);
@@ -1732,6 +1799,23 @@ export default function App() {
     }
   }
 
+
+  function handleUnlock(code) {
+    if (String(code || "").trim() !== PRIVATE_ACCESS_CODE) return false;
+    if (typeof window !== "undefined") window.localStorage.setItem(PRIVACY_STORAGE_KEY, "yes");
+    setUnlocked(true);
+    setLoaded(false);
+    return true;
+  }
+
+  function handleLock() {
+    if (typeof window !== "undefined") window.localStorage.removeItem(PRIVACY_STORAGE_KEY);
+    setUnlocked(false);
+    setEntries([]);
+    setSelectedMonth(null);
+    setPage("archive");
+  }
+
   const filtered = entries
     .filter(e=>filter==="all"||e.writer===filter)
     .filter(e=>!selectedDate||e.date===selectedDate)
@@ -1739,6 +1823,8 @@ export default function App() {
 
   // Render
   if (lightboxSrc) return <Lightbox src={lightboxSrc} onClose={()=>setLightboxSrc(null)}/>;
+
+  if (!unlocked) return <PrivacyGate onUnlock={handleUnlock}/>;
 
   if (!loaded) return (
     <div style={{ display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100vh",background:T.cloudDancer,gap:12 }}>
