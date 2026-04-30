@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   collection, doc, setDoc, deleteDoc, getDoc, onSnapshot, updateDoc
 } from "firebase/firestore";
@@ -108,7 +109,7 @@ const DISPLAY = "'Cormorant Garamond', 'Times New Roman', serif";
 const SANS    = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 // Simple client-side privacy gate. Change this code before publishing if needed.
-const PRIVATE_ACCESS_CODE = "1314";
+const PRIVATE_ACCESS_CODE = "0810";
 const PRIVACY_STORAGE_KEY = "chapters_privacy_unlocked";
 
 // ─── Moods ───────────────────────────────────────────────
@@ -351,7 +352,6 @@ function normalizeEmojiInput(value) {
 function ReactionBar({ entryId, reactions={}, compact = false }) {
   const [open, setOpen] = useState(false);
   const [customEmoji, setCustomEmoji] = useState("");
-  const isMobile = useIsMobile();
 
   const activeReactions = Object.entries(reactions || {})
     .filter(([, count]) => Number(count) > 0)
@@ -372,15 +372,52 @@ function ReactionBar({ entryId, reactions={}, compact = false }) {
     setOpen(false);
   }
 
-  const pickerStyle = isMobile ? {
-    position:"fixed", left:12, right:12, bottom:16, zIndex:999,
-    width:"auto", maxWidth:"none", background:T.surface, border:`1.5px solid ${T.border}`,
-    borderRadius:22, boxShadow:"0 24px 80px rgba(0,0,0,0.34)", padding:14, boxSizing:"border-box"
-  } : {
-    position:"absolute", zIndex:30, marginTop:8, left:0, width:320, maxWidth:"min(320px, calc(100vw - 32px))",
-    background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:16,
-    boxShadow:"0 18px 48px rgba(28,24,20,0.18)", padding:10, boxSizing:"border-box"
-  };
+  const pickerLayer = (
+    <>
+      <div onClick={()=>setOpen(false)} style={{ position:"fixed", inset:0, zIndex:1000, background:"rgba(0,0,0,0.28)", backdropFilter:"blur(2px)", WebkitBackdropFilter:"blur(2px)" }}/>
+      <div style={{
+        position:"fixed", left:"50%", transform:"translateX(-50%)", bottom:"max(14px, env(safe-area-inset-bottom))",
+        zIndex:1001, width:"min(92vw, 460px)", maxHeight:"min(74vh, 520px)", overflowY:"auto",
+        background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:24,
+        boxShadow:"0 28px 90px rgba(0,0,0,0.42)", padding:16, boxSizing:"border-box"
+      }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+          <div>
+            <div style={{ fontSize:12, color:T.ink, fontFamily:SANS, letterSpacing:"0.12em", textTransform:"uppercase", fontWeight:500 }}>Add reaction</div>
+            <div style={{ fontSize:11, color:T.inkLight, fontFamily:SANS, marginTop:3 }}>Tap one emoji or paste your own.</div>
+          </div>
+          <button onClick={()=>setOpen(false)} aria-label="close reaction picker"
+            style={{ width:34, height:34, borderRadius:"50%", border:`1.5px solid ${T.border}`, background:T.cloudDancer, color:T.inkLight, fontSize:20, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0 }}>×</button>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(38px, 1fr))", gap:8 }}>
+          {EMOJI_PICKER.map(emoji => (
+            <button key={emoji} onClick={()=>toggleEmoji(emoji)}
+              style={{
+                border:`1px solid ${T.border}`, background:T.cloudDancer, borderRadius:13,
+                height:42, fontSize:21, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
+                minWidth:0, boxShadow:"0 2px 8px rgba(28,24,20,0.04)"
+              }}>
+              {emoji}
+            </button>
+          ))}
+        </div>
+        <div style={{ display:"flex", gap:8, marginTop:12 }}>
+          <input value={customEmoji} onChange={e=>setCustomEmoji(e.target.value)}
+            placeholder="paste emoji from getemoji.com"
+            style={{
+              flex:1, minWidth:0, background:T.cloudDancer, border:`1.5px solid ${T.border}`,
+              borderRadius:13, padding:"11px 12px", color:T.ink, fontFamily:SANS, fontSize:13,
+              outline:"none", boxSizing:"border-box"
+            }}/>
+          <button onClick={()=>toggleEmoji(customEmoji)}
+            style={{ border:"none", background:T.ink, color:T.cloudDancer, borderRadius:13,
+              padding:"0 16px", fontFamily:SANS, fontSize:13, cursor:"pointer", letterSpacing:"0.04em" }}>
+            add
+          </button>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div style={{ position:"relative", marginTop:compact ? 6 : 8 }}>
@@ -399,7 +436,7 @@ function ReactionBar({ entryId, reactions={}, compact = false }) {
           </button>
         ))}
 
-        <button onClick={()=>setOpen(v=>!v)} aria-label="add reaction"
+        <button onClick={()=>setOpen(true)} aria-label="add reaction"
           style={{
             width:compact ? 23 : 27, height:compact ? 23 : 27, borderRadius:"50%",
             border:`1.5px solid ${open ? T.caramel : T.border}`, background:open ? T.surface2 : "transparent",
@@ -411,45 +448,7 @@ function ReactionBar({ entryId, reactions={}, compact = false }) {
         </button>
       </div>
 
-      {open && (
-        <>
-          {isMobile && <div onClick={()=>setOpen(false)} style={{ position:"fixed", inset:0, zIndex:998, background:"rgba(0,0,0,0.18)" }}/>}
-          <div style={pickerStyle}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
-              <div style={{ fontSize:12, color:T.inkLight, fontFamily:SANS, letterSpacing:"0.08em", textTransform:"uppercase" }}>Add reaction</div>
-              {isMobile && (
-                <button onClick={()=>setOpen(false)} style={{ border:"none", background:"transparent", color:T.inkLight, fontSize:18, cursor:"pointer", padding:0 }}>×</button>
-              )}
-            </div>
-            <div style={{ display:"grid", gridTemplateColumns:isMobile ? "repeat(8, minmax(0,1fr))" : "repeat(8, 1fr)", gap:7 }}>
-              {EMOJI_PICKER.map(emoji => (
-                <button key={emoji} onClick={()=>toggleEmoji(emoji)}
-                  style={{
-                    border:`1px solid ${T.border}`, background:T.cloudDancer, borderRadius:11,
-                    height:isMobile ? 36 : 32, fontSize:isMobile ? 19 : 17, cursor:"pointer",
-                    display:"flex", alignItems:"center", justifyContent:"center", minWidth:0
-                  }}>
-                  {emoji}
-                </button>
-              ))}
-            </div>
-            <div style={{ display:"flex", gap:7, marginTop:10 }}>
-              <input value={customEmoji} onChange={e=>setCustomEmoji(e.target.value)}
-                placeholder="paste emoji from getemoji.com"
-                style={{
-                  flex:1, minWidth:0, background:T.cloudDancer, border:`1px solid ${T.border}`,
-                  borderRadius:11, padding:"9px 10px", color:T.ink, fontFamily:SANS, fontSize:13,
-                  outline:"none", boxSizing:"border-box"
-                }}/>
-              <button onClick={()=>toggleEmoji(customEmoji)}
-                style={{ border:"none", background:T.ink, color:T.cloudDancer, borderRadius:11,
-                  padding:"0 12px", fontFamily:SANS, fontSize:12, cursor:"pointer" }}>
-                add
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      {open && (typeof document !== "undefined" ? createPortal(pickerLayer, document.body) : pickerLayer)}
     </div>
   );
 }
@@ -714,7 +713,7 @@ function ActionRow({ e, onEdit, onRemove, onPreview, compact = false }) {
 function useIsMobile() {
   const getMobile = () => {
     if (typeof window === "undefined") return false;
-    return window.innerWidth < 640;
+    return window.innerWidth < 900;
   };
 
   const [mobile, setMobile] = useState(getMobile);
@@ -1064,18 +1063,20 @@ function HomePage({ entries, names, loveStartDate, onOpenArchive, onAdd, onSetup
 }
 
 function FilterSearchControls({ filtered, names, filter, setFilter, search, setSearch, showSearch, setShowSearch, selectedDate, setSelectedDate }) {
-  const dateInputRef = useRef(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const availableDates = Array.from(new Set((filtered || []).map(e=>e.date).filter(Boolean))).sort((a,b)=>b.localeCompare(a));
+  const calendarMonths = availableDates.reduce((acc, date) => {
+    const month = date.slice(0,7);
+    if (!acc[month]) acc[month] = [];
+    acc[month].push(date);
+    return acc;
+  }, {});
+  const calendarGroups = Object.entries(calendarMonths).sort((a,b)=>b[0].localeCompare(a[0]));
 
-  const openDatePicker = () => {
-    const input = dateInputRef.current;
-    if (!input) return;
-    if (typeof input.showPicker === "function") {
-      input.showPicker();
-    } else {
-      input.focus();
-      input.click();
-    }
-  };
+  function chooseDate(date) {
+    setSelectedDate(date);
+    setShowCalendar(false);
+  }
 
   return (
     <>
@@ -1109,7 +1110,7 @@ function FilterSearchControls({ filtered, names, filter, setFilter, search, setS
         </div>
       )}
 
-      <div style={{ display:"flex", gap:6, marginBottom:"1.2rem", flexWrap:"wrap", alignItems:"center" }}>
+      <div style={{ display:"flex", gap:6, marginBottom:showCalendar ? "0.75rem" : "1.2rem", flexWrap:"wrap", alignItems:"center" }}>
         {[["all","All"],["a",names.a],["b",names.b]].map(([k,label])=>(
           <button key={k} onClick={()=>setFilter(k)}
             style={{ padding:"6px 14px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
@@ -1120,23 +1121,51 @@ function FilterSearchControls({ filtered, names, filter, setFilter, search, setS
           </button>
         ))}
 
-        <label onClick={openDatePicker}
-          style={{ position:"relative", overflow:"hidden", padding:"6px 12px", borderRadius:20, fontSize:12,
-            fontFamily:SANS, cursor:"pointer", border:`1.5px solid ${selectedDate?T.caramel:T.border}`,
-            background:selectedDate?"rgba(196,122,72,0.08)":"transparent", color:selectedDate?T.caramel:T.inkLight,
-            letterSpacing:"0.06em", display:"inline-flex", alignItems:"center", gap:6, userSelect:"none" }}>
-          <span style={{ fontSize:12 }}>⌕</span>
+        <button onClick={()=>setShowCalendar(v=>!v)}
+          style={{ padding:"6px 13px", borderRadius:20, fontSize:12, fontFamily:SANS, cursor:"pointer",
+            border:`1.5px solid ${showCalendar||selectedDate?T.caramel:T.border}`,
+            background:showCalendar||selectedDate?"rgba(196,122,72,0.08)":"transparent",
+            color:showCalendar||selectedDate?T.caramel:T.inkLight, letterSpacing:"0.06em", display:"inline-flex", alignItems:"center", gap:6 }}>
+          <span style={{ fontSize:13, lineHeight:1 }}>◷</span>
           <span>{selectedDate ? fmtDateShort(selectedDate) : "calendar"}</span>
-          <input
-            ref={dateInputRef}
-            type="date"
-            value={selectedDate || ""}
-            onChange={e=>setSelectedDate(e.target.value)}
-            aria-label="Pick a date"
-            style={{ position:"absolute", inset:0, opacity:0, width:"100%", height:"100%", cursor:"pointer" }}
-          />
-        </label>
+        </button>
       </div>
+
+      {showCalendar && (
+        <div style={{ background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:18,
+          padding:"13px 14px", marginBottom:"1.2rem", boxShadow:"0 12px 36px rgba(28,24,20,0.10)", boxSizing:"border-box" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, marginBottom:10 }}>
+            <div>
+              <div style={{ fontSize:12, color:T.ink, letterSpacing:"0.1em", textTransform:"uppercase", fontFamily:SANS }}>Pick a date</div>
+              <div style={{ fontSize:11, color:T.inkLight, marginTop:3, fontFamily:SANS }}>Only days with cards are shown.</div>
+            </div>
+            <button onClick={()=>setShowCalendar(false)} style={{ width:30, height:30, borderRadius:"50%", border:`1.5px solid ${T.border}`, background:T.cloudDancer, color:T.inkLight, cursor:"pointer", fontSize:16 }}>×</button>
+          </div>
+          {calendarGroups.length === 0 ? (
+            <div style={{ fontSize:13, color:T.inkLight, padding:"12px 0" }}>No dates match the current view.</div>
+          ) : (
+            <div style={{ display:"grid", gap:12 }}>
+              {calendarGroups.map(([month, dates])=>(
+                <div key={month}>
+                  <div style={{ fontFamily:DISPLAY, fontSize:22, color:T.ink, fontStyle:"italic", marginBottom:7 }}>{monthLabel(month)}</div>
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(72px, 1fr))", gap:7 }}>
+                    {dates.map(date=>(
+                      <button key={date} onClick={()=>chooseDate(date)}
+                        style={{ border:`1.5px solid ${selectedDate===date?T.caramel:T.border}`,
+                          background:selectedDate===date?"rgba(196,122,72,0.12)":T.cloudDancer,
+                          color:selectedDate===date?T.caramel:T.inkMid, borderRadius:13, padding:"8px 6px", cursor:"pointer",
+                          fontFamily:SANS, fontSize:12, lineHeight:1.15 }}>
+                        <span style={{ display:"block", fontWeight:500 }}>{dayLabel(date).split(",")[0]}</span>
+                        <span style={{ display:"block", marginTop:4, color:selectedDate===date?T.caramel:T.inkLight }}>{fmtDateShort(date)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
